@@ -7,6 +7,7 @@ public class MDCalc {
     private double totalLoans;
     private double retirementContributionRate;
     private double investmentReturnRate;
+    private double inflationRate;
     private int medSchoolYears;
     private int residencyYears;
     private double residencySalary;
@@ -34,6 +35,7 @@ public class MDCalc {
         this.physicianStartingSalary = 250000;
         this.retirementContributionRate = 0.15;
         this.investmentReturnRate = 0.07;
+        this.inflationRate = 0.03;
         this.needsFellowship = false;
         this.fellowshipYears = 1;
         this.fellowshipSalary = 90000;
@@ -87,6 +89,12 @@ public class MDCalc {
         this.annualRaise = input.nextDouble() / 100.0;
         if (this.annualRaise < 0) this.annualRaise = 0;
         if (this.annualRaise > 1) this.annualRaise = 1;
+
+        // New: inflation rate to ensure physician raises at least match inflation
+        System.out.print("Enter expected inflation rate (e.g., 3 for 3%): ");
+        this.inflationRate = input.nextDouble() / 100.0;
+        if (this.inflationRate < 0) this.inflationRate = 0;
+        if (this.inflationRate > 1) this.inflationRate = 1;
 
         System.out.print("Enter average interest rate on medical school loans (e.g., 6 for 6%): ");
         this.loanInterestRate = input.nextDouble() / 100.0;
@@ -356,7 +364,7 @@ public class MDCalc {
             double annualDifference = physicianNetIncome - nonMDSalary;
             cumulativeDifference += annualDifference;
 
-            physicianSalary *= (1 + annualRaise);
+            physicianSalary *= (1 + Math.max(annualRaise, inflationRate));
             nonMDSalary *= (1 + annualRaise);
         }
 
@@ -367,6 +375,14 @@ public class MDCalc {
 
     public void displayResults(OpportunityCostResult result) {
         System.out.println("\n=== OPPORTUNITY COST ANALYSIS ===");
+
+        // TL;DR summary block
+        System.out.println("\n=== RESULTS (TL;DR) ===");
+        System.out.printf("%-34s : $%,.2f%n", "Total Opportunity Cost", result.getTotalCost());
+        System.out.printf("%-34s : %d years%n", "Estimated Break-even Age", result.getBreakEvenAge());
+        System.out.printf("%-34s : %d years%n", "Selected Retirement Age", retirementAge);
+        System.out.printf("%-34s : $%,.2f/mo%n", "Monthly Loan Payment", monthlyLoanPayment);
+        System.out.println("----------------------------------------");
 
         String trainingPath = "";
         if (needsPostBacc) {
@@ -392,22 +408,24 @@ public class MDCalc {
 
         System.out.printf("Retirement assumptions: %.0f%% contribution rate, %.0f%% annual return (daily compounding)%n",
                 retirementContributionRate * 100, investmentReturnRate * 100);
+        System.out.printf("Economic assumption: %.0f%% inflation (MD raises are floored at inflation)%n",
+                inflationRate * 100);
         System.out.println("----------------------------------------");
-        System.out.printf("Direct opportunity cost (lost wages): $%.2f%n", result.getDirectOpportunityCost());
-        System.out.printf("Lost retirement savings (projected to age %d): $%.2f%n", retirementAge, result.getLostRetirementGrowth());
+        System.out.printf("Direct opportunity cost (lost wages): $%,.2f%n", result.getDirectOpportunityCost());
+        System.out.printf("Lost retirement savings (projected to age %d): $%,.2f%n", retirementAge, result.getLostRetirementGrowth());
         if (needsPostBacc) {
-            System.out.printf("Post-bacc loans: $%.2f%n", postBaccCost);
+            System.out.printf("Post-bacc loans: $%,.2f%n", postBaccCost);
         }
-        System.out.printf("Medical school loans: $%.2f%n", totalLoans);
-        System.out.printf("Total loan interest (daily compounding with deferment): $%.2f%n", result.getLoanInterest());
+        System.out.printf("Medical school loans: $%,.2f%n", totalLoans);
+        System.out.printf("Total loan interest (daily compounding with deferment): $%,.2f%n", result.getLoanInterest());
 
         // Calculate and display loan repayment info
         double totalLoanBalance = result.getTotalLoans() + result.getLoanInterest();
-        System.out.printf("Total loan balance at repayment start: $%.2f%n", totalLoanBalance);
-        System.out.printf("Monthly loan payment (%d-year repayment): $%.2f%n", loanRepaymentYears, monthlyLoanPayment);
-        System.out.printf("Annual loan payment burden: $%.2f%n", monthlyLoanPayment * 12);
+        System.out.printf("Total loan balance at repayment start: $%,.2f%n", totalLoanBalance);
+        System.out.printf("Monthly loan payment (%d-year repayment): $%,.2f/mo%n", loanRepaymentYears, monthlyLoanPayment);
+        System.out.printf("Annual loan payment burden: $%,.2f%n", monthlyLoanPayment * 12);
         System.out.println("----------------------------------------");
-        System.out.printf("TOTAL OPPORTUNITY COST: $%.2f%n", result.getTotalCost());
+        System.out.printf("TOTAL OPPORTUNITY COST: $%,.2f%n", result.getTotalCost());
         System.out.printf("ESTIMATED BREAK-EVEN AGE: %d years old%n", result.getBreakEvenAge());
 
         // Additional retirement insight
@@ -420,6 +438,7 @@ public class MDCalc {
             String yearsLabel = diff == 1 ? "year" : "years";
             System.out.printf("%nWARNING: Your selected retirement age (%d) is %d %s below the break-even age (%d).%n",
                     retirementAge, diff, yearsLabel, result.getBreakEvenAge());
+            System.out.println("Suggestion: Consider postponing retirement, improving earnings, or reducing debt to reach break-even sooner.");
         }
 
         // Show what percentage of the total cost is retirement losses
