@@ -278,7 +278,7 @@ public class MDCalc {
         
         double totalCost = totalOpportunityCost + cumulativeLostRetirement + totalLoanInterest + totalLoanAmount;
         
-        int breakEvenAge = calculateBreakEvenAge(totalCost, currentYearSalary, totalLoanBalance);
+        int breakEvenAge = calculateBreakEvenAge(totalCost, currentYearSalary);
         
         return new OpportunityCostResult(totalCost, breakEvenAge, totalOpportunityCost, 
                                        cumulativeLostRetirement, totalLoanInterest, totalLoanAmount);
@@ -301,30 +301,29 @@ public class MDCalc {
         return numerator / denominator;
     }
     
-    private int calculateBreakEvenAge(double totalCost, double projectedSalaryAfterTraining, double totalLoanBalance) {
+    private int calculateBreakEvenAge(double totalCost, double projectedSalaryAfterTraining) {
         double physicianSalary = physicianStartingSalary;
         double nonMDSalary = projectedSalaryAfterTraining;
         double cumulativeDifference = -totalCost;
         int yearsAfterTraining = 0;
         double annualLoanPayment = monthlyLoanPayment * 12;
-        
+
         while (cumulativeDifference < 0 && yearsAfterTraining < 50) {
             yearsAfterTraining++;
-            
-            // Calculate net annual difference accounting for loan payments
+
             double physicianNetIncome = physicianSalary;
             if (yearsAfterTraining <= loanRepaymentYears) {
                 physicianNetIncome -= annualLoanPayment;
             }
-            
+
             double annualDifference = physicianNetIncome - nonMDSalary;
             cumulativeDifference += annualDifference;
-            
+
             physicianSalary *= (1 + annualRaise);
             nonMDSalary *= (1 + annualRaise);
         }
-        
-        int totalTimeToBecomeMD = (needsPostBacc ? yearsUntilPostBacc + postBaccYears + yearsUntilMedSchool : yearsUntilMedSchool) + 
+
+        int totalTimeToBecomeMD = (needsPostBacc ? yearsUntilPostBacc + postBaccYears + yearsUntilMedSchool : yearsUntilMedSchool) +
                                  medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0);
         return currentAge + totalTimeToBecomeMD + yearsAfterTraining;
     }
