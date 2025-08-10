@@ -86,6 +86,8 @@ public class Main {
         };
 
         // Load current settings (or built-ins if not set yet)
+        int currentAge = DefaultsManager.getInt(DefaultsManager.Keys.CURRENT_AGE, 30);
+        double currentSalary = DefaultsManager.getDouble(DefaultsManager.Keys.CURRENT_SALARY, 75000);
         int medSchoolYears = DefaultsManager.getInt(DefaultsManager.Keys.MED_SCHOOL_YEARS, 4);
         int residencyYears = DefaultsManager.getInt(DefaultsManager.Keys.RESIDENCY_YEARS, 3);
         double residencySalary = DefaultsManager.getDouble(DefaultsManager.Keys.RESIDENCY_SALARY, 60000);
@@ -108,6 +110,8 @@ public class Main {
         double loanInterestRate = DefaultsManager.getDouble(DefaultsManager.Keys.LOAN_INTEREST_RATE, 0.06);
 
         // Ask user
+        currentAge = askInt.apply("Current age", currentAge);
+        currentSalary = askDouble.apply("Current annual salary ($)", currentSalary);
         medSchoolYears = askInt.apply("Medical school years", medSchoolYears);
         residencyYears = askInt.apply("Residency years", residencyYears);
         residencySalary = askDouble.apply("Residency salary ($)", residencySalary);
@@ -130,6 +134,8 @@ public class Main {
         loanInterestRate = askDouble.apply("Loan interest rate (fraction, e.g., 0.06)", loanInterestRate);
 
         // Save
+        DefaultsManager.setInt(DefaultsManager.Keys.CURRENT_AGE, currentAge);
+        DefaultsManager.setDouble(DefaultsManager.Keys.CURRENT_SALARY, currentSalary);
         DefaultsManager.setInt(DefaultsManager.Keys.MED_SCHOOL_YEARS, medSchoolYears);
         DefaultsManager.setInt(DefaultsManager.Keys.RESIDENCY_YEARS, residencyYears);
         DefaultsManager.setDouble(DefaultsManager.Keys.RESIDENCY_SALARY, residencySalary);

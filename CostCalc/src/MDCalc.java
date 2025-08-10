@@ -30,6 +30,8 @@ public class MDCalc {
 
     public MDCalc() {
         // Built-in defaults
+        this.currentAge = 30; // Add built-in default for age
+        this.currentSalary = 75000; // Add built-in default for salary
         this.medSchoolYears = 4;
         this.residencyYears = 3;
         this.residencySalary = 60000;
@@ -54,6 +56,8 @@ public class MDCalc {
 
         // Override with saved defaults (if present)
         try {
+            this.currentAge = DefaultsManager.getInt(DefaultsManager.Keys.CURRENT_AGE, this.currentAge);
+            this.currentSalary = DefaultsManager.getDouble(DefaultsManager.Keys.CURRENT_SALARY, this.currentSalary);
             this.medSchoolYears = DefaultsManager.getInt(DefaultsManager.Keys.MED_SCHOOL_YEARS, this.medSchoolYears);
             this.residencyYears = DefaultsManager.getInt(DefaultsManager.Keys.RESIDENCY_YEARS, this.residencyYears);
             this.residencySalary = DefaultsManager.getDouble(DefaultsManager.Keys.RESIDENCY_SALARY, this.residencySalary);
@@ -80,12 +84,14 @@ public class MDCalc {
     }
 
     public void collectUserInput(Scanner input) {
-        System.out.print("Enter your current age: ");
-        this.currentAge = input.nextInt();
+        System.out.printf("Enter your current age [%d] (enter 0 to keep default): ", this.currentAge);
+        int tmpAge = input.nextInt();
+        if (tmpAge > 0) this.currentAge = tmpAge;
         if (this.currentAge < 0) this.currentAge = 0;
 
-        System.out.print("Enter your current annual salary: $");
-        this.currentSalary = input.nextDouble();
+        System.out.printf("Enter your current annual salary [$%.0f] (enter 0 to keep default): $", this.currentSalary);
+        double tmpSalary = input.nextDouble();
+        if (tmpSalary > 0) this.currentSalary = tmpSalary;
         if (this.currentSalary < 0) this.currentSalary = 0;
 
         System.out.printf("Will you need to do a post-bacc program? [%s] (y/n): ", this.needsPostBacc ? "y" : "n");

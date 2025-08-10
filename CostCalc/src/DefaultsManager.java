@@ -77,6 +77,8 @@ public class DefaultsManager {
 
     // Keys used by MDCalc
     public static class Keys {
+        public static final String CURRENT_AGE = "currentAge";
+        public static final String CURRENT_SALARY = "currentSalary";
         public static final String MED_SCHOOL_YEARS = "medSchoolYears";
         public static final String RESIDENCY_YEARS = "residencyYears";
         public static final String RESIDENCY_SALARY = "residencySalary";
