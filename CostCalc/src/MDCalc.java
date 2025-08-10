@@ -29,6 +29,7 @@ public class MDCalc {
     private boolean alignRepaymentToRetirement;
 
     public MDCalc() {
+        // Built-in defaults
         this.medSchoolYears = 4;
         this.residencyYears = 3;
         this.residencySalary = 60000;
@@ -48,6 +49,32 @@ public class MDCalc {
         this.monthlyLoanPayment = 0; // Will be calculated if not provided
         this.retirementAge = 65;     // Default retirement age (now configurable)
         this.alignRepaymentToRetirement = false;
+
+        // Override with saved defaults (if present)
+        try {
+            this.medSchoolYears = DefaultsManager.getInt(DefaultsManager.Keys.MED_SCHOOL_YEARS, this.medSchoolYears);
+            this.residencyYears = DefaultsManager.getInt(DefaultsManager.Keys.RESIDENCY_YEARS, this.residencyYears);
+            this.residencySalary = DefaultsManager.getDouble(DefaultsManager.Keys.RESIDENCY_SALARY, this.residencySalary);
+            this.physicianStartingSalary = DefaultsManager.getDouble(DefaultsManager.Keys.PHYSICIAN_STARTING_SALARY, this.physicianStartingSalary);
+            this.retirementContributionRate = DefaultsManager.getDouble(DefaultsManager.Keys.RETIREMENT_CONTRIB_RATE, this.retirementContributionRate);
+            this.investmentReturnRate = DefaultsManager.getDouble(DefaultsManager.Keys.INVESTMENT_RETURN_RATE, this.investmentReturnRate);
+            this.inflationRate = DefaultsManager.getDouble(DefaultsManager.Keys.INFLATION_RATE, this.inflationRate);
+            this.needsFellowship = DefaultsManager.getBoolean(DefaultsManager.Keys.NEEDS_FELLOWSHIP, this.needsFellowship);
+            this.fellowshipYears = DefaultsManager.getInt(DefaultsManager.Keys.FELLOWSHIP_YEARS, this.fellowshipYears);
+            this.fellowshipSalary = DefaultsManager.getDouble(DefaultsManager.Keys.FELLOWSHIP_SALARY, this.fellowshipSalary);
+            this.needsPostBacc = DefaultsManager.getBoolean(DefaultsManager.Keys.NEEDS_POST_BACC, this.needsPostBacc);
+            this.postBaccYears = DefaultsManager.getInt(DefaultsManager.Keys.POST_BACC_YEARS, this.postBaccYears);
+            this.postBaccCost = DefaultsManager.getDouble(DefaultsManager.Keys.POST_BACC_COST, this.postBaccCost);
+            this.yearsUntilPostBacc = DefaultsManager.getInt(DefaultsManager.Keys.YEARS_UNTIL_POST_BACC, this.yearsUntilPostBacc);
+            this.yearsUntilMedSchool = DefaultsManager.getInt(DefaultsManager.Keys.YEARS_UNTIL_MED_SCHOOL, this.yearsUntilMedSchool);
+            this.loanRepaymentYears = DefaultsManager.getInt(DefaultsManager.Keys.LOAN_REPAYMENT_YEARS, this.loanRepaymentYears);
+            this.monthlyLoanPayment = DefaultsManager.getDouble(DefaultsManager.Keys.MONTHLY_LOAN_PAYMENT, this.monthlyLoanPayment);
+            this.retirementAge = DefaultsManager.getInt(DefaultsManager.Keys.RETIREMENT_AGE, this.retirementAge);
+            this.annualRaise = DefaultsManager.getDouble(DefaultsManager.Keys.ANNUAL_RAISE, this.annualRaise);
+            this.loanInterestRate = DefaultsManager.getDouble(DefaultsManager.Keys.LOAN_INTEREST_RATE, this.loanInterestRate);
+        } catch (Throwable ignored) {
+            // If defaults file is missing or malformed, just keep built-in defaults.
+        }
     }
 
     public void collectUserInput(Scanner input) {
