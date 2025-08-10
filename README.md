@@ -23,8 +23,10 @@ This calculator provides a detailed financial analysis for aspiring physicians, 
 ### Advanced Financial Modeling
 - **Daily compounding**: Both loan interest and investment returns use daily compounding for accuracy
 - **Timeline-based calculations**: Accounts for actual matriculation timing and career progression
-- **Retirement projections**: Projects missed contributions to age 65 with compound growth
+- **Configurable retirement age**: Projects missed contributions to your selected retirement age
+- **Flexible loan repayment**: Standard terms or auto-aligned to retirement age
 - **Salary growth modeling**: Annual raises applied throughout career timeline
+- **Input validation**: Robust error handling and bounds checking for all user inputs
 
 ### Detailed Cost Breakdown
 - Direct opportunity cost (lost wages)
@@ -76,19 +78,23 @@ The application will prompt for the following information:
 5. **Financial Assumptions**
    - Retirement contribution rate (default: 15%)
    - Investment return rate (default: 7%)
+   - Retirement age (default: 65, fully configurable)
    - Loan repayment period (default: 10 years)
    - Monthly loan payment (auto-calculated if not specified)
+   - Auto-align loan payoff to retirement age (optional)
 
 ### Sample Input Files
-Three sample scenarios are provided in the `sample_inputs/` directory:
+Four sample scenarios are provided in the `sample_inputs/` directory:
 
-- `traditional_path.txt`: Young student (25), no post-bacc, no fellowship
-- `postbacc_fellowship.txt`: Career changer (30) with post-bacc and fellowship
-- `nontraditional_no_postbacc.txt`: Older career changer (32), higher income, no post-bacc
+- `traditional_path.txt`: Young student (25), no post-bacc, no fellowship, standard retirement
+- `postbacc_fellowship.txt`: Career changer (30) with post-bacc and fellowship, standard retirement
+- `nontraditional_no_postbacc.txt`: Older career changer (32), higher income, late retirement (70), auto-aligned loans
+- `early_retirement.txt`: FIRE planner (28), early retirement (55), shows massive opportunity cost impact
 
 To use sample inputs:
 ```bash
 java Main < sample_inputs/traditional_path.txt
+java Main < sample_inputs/early_retirement.txt  # See impact of early retirement
 ```
 
 ## Sample Output
@@ -142,14 +148,16 @@ The calculator determines when cumulative physician earnings exceed the non-MD c
 - Continued salary growth in both career paths
 - **Monthly loan payments** reducing net physician income during repayment period
 - Complete loan payoff after the specified repayment period
+- **Configurable retirement age** affecting total earning years and retirement projections
 
 ## Key Assumptions
 
-- **Retirement age**: 65 years old
+- **Retirement age**: User-configurable (default: 65 years old)
 - **Loan deferment**: Interest accrues but no payments during training
 - **Daily compounding**: 365 days per year for all financial calculations
 - **Salary growth**: Applied consistently throughout timeline
 - **Career progression**: Immediate transition between training phases
+- **Input validation**: Automatic bounds checking prevents invalid entries
 
 ## Educational Purpose
 

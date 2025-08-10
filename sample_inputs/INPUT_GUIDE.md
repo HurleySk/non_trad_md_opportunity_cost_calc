@@ -31,10 +31,12 @@ This guide explains each input parameter and provides examples for different sce
 18. **Starting Physician Salary**: Expected first-year attending salary (e.g., `350000`)
 
 ### Financial Assumptions
-19. **Retirement Contribution %**: Percent of salary saved for retirement (default `15`)
-20. **Investment Return %**: Expected annual return on retirement investments (default `7`)
-21. **Loan Repayment Period**: Years to pay back student loans (default `10`)
-22. **Monthly Loan Payment**: Enter `0` to auto-calculate based on standard loan payment formula
+19. **Retirement Contribution %**: Percent of salary saved for retirement (default `15`, enter `0` to keep default)
+20. **Investment Return %**: Expected annual return on retirement investments (default `7`, enter `0` to keep default)
+21. **Retirement Age**: Your planned retirement age (default `65`, enter `0` to keep default)
+22. **Loan Repayment Period**: Years to pay back student loans (default `10`, enter `0` to keep default)
+23. **Monthly Loan Payment**: Enter `0` to auto-calculate based on standard loan payment formula
+24. **Auto-Align Loan Payoff**: `y` to extend loan term until retirement age, `n` for standard term
 
 ## Sample Scenarios
 
@@ -51,6 +53,7 @@ This guide explains each input parameter and provides examples for different sce
 - 2-year post-bacc program required
 - 2-year fellowship for subspecialty
 - Higher attending salary reflecting subspecialty training
+- Standard retirement at age 65, traditional 10-year loan repayment
 
 ### Non-Traditional, No Post-Bacc (nontraditional_no_postbacc.txt)
 - Age 32, established professional
@@ -59,6 +62,16 @@ This guide explains each input parameter and provides examples for different sce
 - 4-year residency (longer specialty program)
 - Higher retirement contribution rate (20%) due to financial sophistication
 - More aggressive investment assumptions (8% return)
+- **Late retirement at age 70** to maximize earning years
+- **Auto-aligned loan repayment** to retirement age for lower monthly payments
+
+### Early Retirement (early_retirement.txt)
+- Age 28, high earner planning FIRE (Financial Independence, Retire Early)
+- $85K current salary with aggressive savings rate
+- No post-bacc, 1-year fellowship
+- **Early retirement at age 55** - shows massive opportunity cost impact
+- High retirement contribution (18%) and investment return (8%) assumptions
+- **Auto-aligned loan repayment** to retirement for comparison
 
 ## Tips for Accurate Estimates
 
@@ -81,6 +94,12 @@ This guide explains each input parameter and provides examples for different sce
 - Be realistic about MCAT preparation and application timing
 - Account for potential gap years or delayed starts
 - Consider competitive residency match probabilities
+
+### Retirement Planning
+- **Early retirement (50-60)**: Dramatically increases opportunity cost due to fewer earning years
+- **Standard retirement (65-67)**: Balanced approach for most scenarios
+- **Late retirement (70+)**: Maximizes physician earning potential, reduces opportunity cost
+- **Auto-align loans**: Compare extended repayment vs. aggressive payoff strategies
 
 ## Understanding the Results
 
