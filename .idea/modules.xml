@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/CostCalc/CostCalc.iml" filepath="$PROJECT_DIR$/CostCalc/CostCalc.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MDCalc/MDCalc.iml" filepath="$PROJECT_DIR$/MDCalc/MDCalc.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/non_trad_md_opportunity_cost_calc.iml" filepath="$PROJECT_DIR$/.idea/non_trad_md_opportunity_cost_calc.iml" />
+    </modules>
+  </component>
+</project>
