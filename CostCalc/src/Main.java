@@ -14,7 +14,13 @@ public class Main {
             System.out.println("1. Calculate Opportunity Cost");
             System.out.println("2. Exit\n");
             System.out.print("Enter: ");
+            if (!globalInput.hasNextInt()) {
+                System.out.println("Invalid input. Please enter a number.");
+                globalInput.nextLine(); // consume invalid input
+                continue;
+            }
             selection = globalInput.nextInt();
+            globalInput.nextLine(); // consume newline after the number
 
             if (selection == 2) {
                 shouldExit = true;

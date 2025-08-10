@@ -20,6 +20,8 @@ public class MDCalc {
     private double postBaccCost;
     private int yearsUntilPostBacc;
     private int yearsUntilMedSchool;
+    private int loanRepaymentYears;
+    private double monthlyLoanPayment;
     
     public MDCalc() {
         this.medSchoolYears = 4;
@@ -36,6 +38,8 @@ public class MDCalc {
         this.postBaccCost = 60000;
         this.yearsUntilPostBacc = 1;
         this.yearsUntilMedSchool = 1;
+        this.loanRepaymentYears = 10;
+        this.monthlyLoanPayment = 0; // Will be calculated if not provided
     }
     
     public void collectUserInput(Scanner input) {
@@ -115,6 +119,15 @@ public class MDCalc {
         if (inputInvestmentReturn > 0) {
             this.investmentReturnRate = inputInvestmentReturn / 100.0;
         }
+        
+        System.out.printf("Enter loan repayment period in years (default %d): ", this.loanRepaymentYears);
+        int inputRepaymentYears = input.nextInt();
+        if (inputRepaymentYears > 0) {
+            this.loanRepaymentYears = inputRepaymentYears;
+        }
+        
+        System.out.print("Enter monthly loan payment amount (enter 0 to auto-calculate): $");
+        this.monthlyLoanPayment = input.nextDouble();
     }
     
     public OpportunityCostResult calculateOpportunityCost() {
@@ -234,23 +247,57 @@ public class MDCalc {
         
         double totalLoanAmount = totalLoans + (needsPostBacc ? postBaccCost : 0);
         double totalLoanInterest = cumulativeLoanInterest + postBaccLoanInterest;
+        
+        // Calculate total loan balance at start of repayment (principal + all accrued interest)
+        double totalLoanBalance = totalLoanAmount + totalLoanInterest;
+        
+        // Auto-calculate monthly payment if not provided
+        if (monthlyLoanPayment <= 0) {
+            monthlyLoanPayment = calculateMonthlyPayment(totalLoanBalance, loanInterestRate, loanRepaymentYears);
+        }
+        
         double totalCost = totalOpportunityCost + cumulativeLostRetirement + totalLoanInterest + totalLoanAmount;
         
-        int breakEvenAge = calculateBreakEvenAge(totalCost, currentYearSalary);
+        int breakEvenAge = calculateBreakEvenAge(totalCost, currentYearSalary, totalLoanBalance);
         
         return new OpportunityCostResult(totalCost, breakEvenAge, totalOpportunityCost, 
                                        cumulativeLostRetirement, totalLoanInterest, totalLoanAmount);
     }
     
-    private int calculateBreakEvenAge(double totalCost, double projectedSalaryAfterTraining) {
+    private double calculateMonthlyPayment(double loanBalance, double annualRate, int years) {
+        if (loanBalance <= 0 || years <= 0) return 0;
+        
+        double monthlyRate = annualRate / 12.0;
+        int totalPayments = years * 12;
+        
+        if (monthlyRate == 0) {
+            return loanBalance / totalPayments;
+        }
+        
+        // Standard loan payment formula: P * [r(1+r)^n] / [(1+r)^n - 1]
+        double numerator = loanBalance * monthlyRate * Math.pow(1 + monthlyRate, totalPayments);
+        double denominator = Math.pow(1 + monthlyRate, totalPayments) - 1;
+        
+        return numerator / denominator;
+    }
+    
+    private int calculateBreakEvenAge(double totalCost, double projectedSalaryAfterTraining, double totalLoanBalance) {
         double physicianSalary = physicianStartingSalary;
         double nonMDSalary = projectedSalaryAfterTraining;
         double cumulativeDifference = -totalCost;
         int yearsAfterTraining = 0;
+        double annualLoanPayment = monthlyLoanPayment * 12;
         
         while (cumulativeDifference < 0 && yearsAfterTraining < 50) {
             yearsAfterTraining++;
-            double annualDifference = physicianSalary - nonMDSalary;
+            
+            // Calculate net annual difference accounting for loan payments
+            double physicianNetIncome = physicianSalary;
+            if (yearsAfterTraining <= loanRepaymentYears) {
+                physicianNetIncome -= annualLoanPayment;
+            }
+            
+            double annualDifference = physicianNetIncome - nonMDSalary;
             cumulativeDifference += annualDifference;
             
             physicianSalary *= (1 + annualRaise);
@@ -297,6 +344,12 @@ public class MDCalc {
         }
         System.out.printf("Medical school loans: $%.2f%n", totalLoans);
         System.out.printf("Total loan interest (daily compounding with deferment): $%.2f%n", result.getLoanInterest());
+        
+        // Calculate and display loan repayment info
+        double totalLoanBalance = result.getTotalLoans() + result.getLoanInterest();
+        System.out.printf("Total loan balance at repayment start: $%.2f%n", totalLoanBalance);
+        System.out.printf("Monthly loan payment (%d-year repayment): $%.2f%n", loanRepaymentYears, monthlyLoanPayment);
+        System.out.printf("Annual loan payment burden: $%.2f%n", monthlyLoanPayment * 12);
         System.out.println("----------------------------------------");
         System.out.printf("TOTAL OPPORTUNITY COST: $%.2f%n", result.getTotalCost());
         System.out.printf("ESTIMATED BREAK-EVEN AGE: %d years old%n", result.getBreakEvenAge());

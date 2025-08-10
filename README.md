@@ -8,8 +8,9 @@ This calculator provides a detailed financial analysis for aspiring physicians, 
 - **Lost wages** during training years
 - **Retirement savings opportunity costs** with compound growth projections
 - **Student loan interest** with daily compounding and proper deferment periods
+- **Loan repayment burden** with configurable repayment terms and monthly payments
 - **Post-bacc program costs** and timeline impacts
-- **Break-even analysis** to determine when physician income recovers total costs
+- **Break-even analysis** accounting for ongoing loan payments until loans are paid off
 
 ## Features
 
@@ -75,6 +76,8 @@ The application will prompt for the following information:
 5. **Financial Assumptions**
    - Retirement contribution rate (default: 15%)
    - Investment return rate (default: 7%)
+   - Loan repayment period (default: 10 years)
+   - Monthly loan payment (auto-calculated if not specified)
 
 ### Sample Input Files
 Three sample scenarios are provided in the `sample_inputs/` directory:
@@ -102,9 +105,12 @@ Lost retirement savings (projected to age 65): $865,292.96
 Post-bacc loans: $60,000.00
 Medical school loans: $300,000.00
 Total loan interest (daily compounding with deferment): $278,037.91
+Total loan balance at repayment start: $638,037.91
+Monthly loan payment (10-year repayment): $7,083.53
+Annual loan payment burden: $85,002.35
 ----------------------------------------
 TOTAL OPPORTUNITY COST: $2,225,335.94
-ESTIMATED BREAK-EVEN AGE: 52 years old
+ESTIMATED BREAK-EVEN AGE: 55 years old
 Years of physician earnings until retirement: 22 years
 Retirement losses represent 38.9% of total opportunity cost
 ```
@@ -132,7 +138,10 @@ Future Value = Missed_Contribution × (1 + daily_rate)^days_until_retirement
 ```
 
 ### Break-Even Analysis
-The calculator determines when cumulative physician earnings exceed the non-MD career path plus total opportunity costs, accounting for continued salary growth in both scenarios.
+The calculator determines when cumulative physician earnings exceed the non-MD career path plus total opportunity costs, accounting for:
+- Continued salary growth in both career paths
+- **Monthly loan payments** reducing net physician income during repayment period
+- Complete loan payoff after the specified repayment period
 
 ## Key Assumptions
 

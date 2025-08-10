@@ -33,6 +33,8 @@ This guide explains each input parameter and provides examples for different sce
 ### Financial Assumptions
 19. **Retirement Contribution %**: Percent of salary saved for retirement (default `15`)
 20. **Investment Return %**: Expected annual return on retirement investments (default `7`)
+21. **Loan Repayment Period**: Years to pay back student loans (default `10`)
+22. **Monthly Loan Payment**: Enter `0` to auto-calculate based on standard loan payment formula
 
 ## Sample Scenarios
 
