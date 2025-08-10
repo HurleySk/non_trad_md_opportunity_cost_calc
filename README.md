@@ -172,9 +172,11 @@ non_trad_md_opportunity_cost_calc/
 │       ├── Main.java          # Application entry point and menu system
 │       └── MDCalc.java        # Core calculation engine and financial modeling
 ├── sample_inputs/
-│   ├── traditional_path.txt
-│   ├── postbacc_fellowship.txt
-│   └── nontraditional_no_postbacc.txt
+│   ├── INPUT_GUIDE.md         # Detailed parameter explanations
+│   ├── traditional_path.txt   # Standard retirement (65)
+│   ├── postbacc_fellowship.txt # Complex training path
+│   ├── nontraditional_no_postbacc.txt # Late retirement (70), auto-aligned loans
+│   └── early_retirement.txt   # Early retirement (55), high opportunity cost
 └── README.md                  # This file
 ```
 
@@ -184,6 +186,7 @@ non_trad_md_opportunity_cost_calc/
 - **v2.0**: Added retirement savings projections and enhanced loan interest modeling
 - **v3.0**: Implemented post-bacc program support and timeline-based calculations
 - **v4.0**: Enhanced with daily compounding for all financial calculations
+- **v5.0**: Added configurable retirement age, auto-aligned loan repayment, robust input validation
 
 ## Contributing
 

@@ -416,7 +416,10 @@ public class MDCalc {
         System.out.printf("Years of physician earnings until retirement: %.0f years%n", yearsOfEarnings);
 
         if (result.getBreakEvenAge() > retirementAge) {
-            System.out.println("\nWARNING: Break-even point exceeds typical retirement age!");
+            int diff = result.getBreakEvenAge() - retirementAge;
+            String yearsLabel = diff == 1 ? "year" : "years";
+            System.out.printf("%nWARNING: Your selected retirement age (%d) is %d %s below the break-even age (%d).%n",
+                    retirementAge, diff, yearsLabel, result.getBreakEvenAge());
         }
 
         // Show what percentage of the total cost is retirement losses
