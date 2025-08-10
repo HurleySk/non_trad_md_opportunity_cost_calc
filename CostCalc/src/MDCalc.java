@@ -37,6 +37,8 @@ public class MDCalc {
         this.retirementContributionRate = 0.15;
         this.investmentReturnRate = 0.07;
         this.inflationRate = 0.03;
+        this.annualRaise = 0.03; // Add missing built-in default
+        this.loanInterestRate = 0.06; // Add missing built-in default
         this.needsFellowship = false;
         this.fellowshipYears = 1;
         this.fellowshipSalary = 90000;
@@ -86,45 +88,49 @@ public class MDCalc {
         this.currentSalary = input.nextDouble();
         if (this.currentSalary < 0) this.currentSalary = 0;
 
-        System.out.print("Will you need to do a post-bacc program? (y/n): ");
+        System.out.printf("Will you need to do a post-bacc program? [%s] (y/n): ", this.needsPostBacc ? "y" : "n");
         String postBaccResponse = input.next().toLowerCase();
         this.needsPostBacc = postBaccResponse.startsWith("y");
 
         if (this.needsPostBacc) {
-            System.out.print("How many years until you start post-bacc? (default 1, enter 0 to keep default): ");
+            System.out.printf("How many years until you start post-bacc? [%d] (enter 0 to keep default): ", this.yearsUntilPostBacc);
             int tmpYearsUntilPostBacc = input.nextInt();
             if (tmpYearsUntilPostBacc > 0) this.yearsUntilPostBacc = tmpYearsUntilPostBacc;
 
-            System.out.print("How many years will post-bacc take? (default 2, enter 0 to keep default): ");
+            System.out.printf("How many years will post-bacc take? [%d] (enter 0 to keep default): ", this.postBaccYears);
             int tmpPostBaccYears = input.nextInt();
             if (tmpPostBaccYears > 0) this.postBaccYears = tmpPostBaccYears;
 
-            System.out.print("What is the total cost of post-bacc program? $ (enter 0 if none): $");
-            this.postBaccCost = input.nextDouble();
+            System.out.printf("What is the total cost of post-bacc program? [$%.0f] (enter 0 to keep default): $", this.postBaccCost);
+            double tmpPostBaccCost = input.nextDouble();
+            if (tmpPostBaccCost > 0) this.postBaccCost = tmpPostBaccCost;
             if (this.postBaccCost < 0) this.postBaccCost = 0;
 
-            System.out.print("How many years after post-bacc until medical school? (default 1, enter 0 to keep default): ");
+            System.out.printf("How many years after post-bacc until medical school? [%d] (enter 0 to keep default): ", this.yearsUntilMedSchool);
             int tmpYearsUntilMedAfterPB = input.nextInt();
             if (tmpYearsUntilMedAfterPB > 0) this.yearsUntilMedSchool = tmpYearsUntilMedAfterPB;
         } else {
-            System.out.print("How many years until you start medical school? (default 1, enter 0 to keep default): ");
+            System.out.printf("How many years until you start medical school? [%d] (enter 0 to keep default): ", this.yearsUntilMedSchool);
             int tmpYearsUntilMed = input.nextInt();
             if (tmpYearsUntilMed > 0) this.yearsUntilMedSchool = tmpYearsUntilMed;
         }
 
-        System.out.print("Enter your expected annual raise percentage (e.g., 3 for 3%): ");
-        this.annualRaise = input.nextDouble() / 100.0;
+        System.out.printf("Enter your expected annual raise percentage [%.1f%%] (e.g., 3 for 3%%): ", this.annualRaise * 100);
+        double tmpAnnualRaise = input.nextDouble() / 100.0;
+        if (tmpAnnualRaise >= 0 && tmpAnnualRaise <= 1) this.annualRaise = tmpAnnualRaise;
         if (this.annualRaise < 0) this.annualRaise = 0;
         if (this.annualRaise > 1) this.annualRaise = 1;
 
         // New: inflation rate to ensure physician raises at least match inflation
-        System.out.print("Enter expected inflation rate (e.g., 3 for 3%): ");
-        this.inflationRate = input.nextDouble() / 100.0;
+        System.out.printf("Enter expected inflation rate [%.1f%%] (e.g., 3 for 3%%): ", this.inflationRate * 100);
+        double tmpInflationRate = input.nextDouble() / 100.0;
+        if (tmpInflationRate >= 0 && tmpInflationRate <= 1) this.inflationRate = tmpInflationRate;
         if (this.inflationRate < 0) this.inflationRate = 0;
         if (this.inflationRate > 1) this.inflationRate = 1;
 
-        System.out.print("Enter average interest rate on medical school loans (e.g., 6 for 6%): ");
-        this.loanInterestRate = input.nextDouble() / 100.0;
+        System.out.printf("Enter average interest rate on medical school loans [%.1f%%] (e.g., 6 for 6%%): ", this.loanInterestRate * 100);
+        double tmpLoanInterestRate = input.nextDouble() / 100.0;
+        if (tmpLoanInterestRate >= 0 && tmpLoanInterestRate <= 1) this.loanInterestRate = tmpLoanInterestRate;
         if (this.loanInterestRate < 0) this.loanInterestRate = 0;
         if (this.loanInterestRate > 1) this.loanInterestRate = 1;
 
@@ -132,37 +138,38 @@ public class MDCalc {
         this.totalLoans = input.nextDouble();
         if (this.totalLoans < 0) this.totalLoans = 0;
 
-        System.out.print("Enter years of residency (default 3, enter 0 to keep default): ");
+        System.out.printf("Enter years of residency [%d] (enter 0 to keep default): ", this.residencyYears);
         int tmpResidencyYears = input.nextInt();
         if (tmpResidencyYears > 0) this.residencyYears = tmpResidencyYears;
 
-        System.out.printf("Confirm residency salary per year (default $%.0f, enter 0 to keep default): $", this.residencySalary);
+        System.out.printf("Confirm residency salary per year [$%.0f] (enter 0 to keep default): $", this.residencySalary);
         double inputResidencySalary = input.nextDouble();
         if (inputResidencySalary > 0) {
             this.residencySalary = inputResidencySalary;
         }
 
-        System.out.print("Will you need a fellowship? (y/n): ");
+        System.out.printf("Will you need a fellowship? [%s] (y/n): ", this.needsFellowship ? "y" : "n");
         String fellowshipResponse = input.next().toLowerCase();
         this.needsFellowship = fellowshipResponse.startsWith("y");
 
         if (this.needsFellowship) {
-            System.out.print("Enter fellowship duration in years (default 1, enter 0 to keep default): ");
+            System.out.printf("Enter fellowship duration in years [%d] (enter 0 to keep default): ", this.fellowshipYears);
             int tmpFellowshipYears = input.nextInt();
             if (tmpFellowshipYears > 0) this.fellowshipYears = tmpFellowshipYears;
 
-            System.out.printf("Confirm fellowship salary per year (default $%.0f, enter 0 to keep default): $", this.fellowshipSalary);
+            System.out.printf("Confirm fellowship salary per year [$%.0f] (enter 0 to keep default): $", this.fellowshipSalary);
             double inputFellowshipSalary = input.nextDouble();
             if (inputFellowshipSalary > 0) {
                 this.fellowshipSalary = inputFellowshipSalary;
             }
         }
 
-        System.out.print("Enter expected starting physician salary (after residency/fellowship): $");
-        this.physicianStartingSalary = input.nextDouble();
+        System.out.printf("Enter expected starting physician salary (after residency/fellowship) [$%.0f]: $", this.physicianStartingSalary);
+        double tmpPhysicianSalary = input.nextDouble();
+        if (tmpPhysicianSalary > 0) this.physicianStartingSalary = tmpPhysicianSalary;
         if (this.physicianStartingSalary < 0) this.physicianStartingSalary = 0;
 
-        System.out.printf("Confirm retirement contribution rate (default %.0f%% of salary, enter 0 to keep default): ",
+        System.out.printf("Confirm retirement contribution rate [%.0f%%] of salary (enter 0 to keep default): ",
                 this.retirementContributionRate * 100);
         double inputRetirementRate = input.nextDouble();
         if (inputRetirementRate > 0) {
@@ -171,7 +178,7 @@ public class MDCalc {
             this.retirementContributionRate = inputRetirementRate / 100.0;
         }
 
-        System.out.printf("Confirm expected investment return rate (default %.0f%% annually, enter 0 to keep default): ",
+        System.out.printf("Confirm expected investment return rate [%.0f%%] annually (enter 0 to keep default): ",
                 this.investmentReturnRate * 100);
         double inputInvestmentReturn = input.nextDouble();
         if (inputInvestmentReturn > 0) {
@@ -181,7 +188,7 @@ public class MDCalc {
         }
 
         // New: user-selected retirement age
-        System.out.printf("Enter desired retirement age (default %d, enter 0 to keep default): ", this.retirementAge);
+        System.out.printf("Enter desired retirement age [%d] (enter 0 to keep default): ", this.retirementAge);
         int inputRetirementAge = input.nextInt();
         if (inputRetirementAge > 0) {
             if (inputRetirementAge <= this.currentAge) {
@@ -193,14 +200,15 @@ public class MDCalc {
             this.retirementAge = inputRetirementAge;
         }
 
-        System.out.printf("Enter loan repayment period in years (default %d, enter 0 to keep default): ", this.loanRepaymentYears);
+        System.out.printf("Enter loan repayment period in years [%d] (enter 0 to keep default): ", this.loanRepaymentYears);
         int inputRepaymentYears = input.nextInt();
         if (inputRepaymentYears > 0) {
             this.loanRepaymentYears = inputRepaymentYears;
         }
 
-        System.out.print("Enter monthly loan payment amount (enter 0 to auto-calculate): $");
-        this.monthlyLoanPayment = input.nextDouble();
+        System.out.printf("Enter monthly loan payment amount [$%.0f] (enter 0 to auto-calculate): $", this.monthlyLoanPayment);
+        double tmpMonthlyPayment = input.nextDouble();
+        if (tmpMonthlyPayment >= 0) this.monthlyLoanPayment = tmpMonthlyPayment;
         if (this.monthlyLoanPayment < 0) this.monthlyLoanPayment = 0;
 
         // New: ask whether to auto-align payoff to retirement age

@@ -1,6 +1,6 @@
 # Medical School Opportunity Cost Calculator
 
-A comprehensive Java console application that calculates the true financial opportunity cost of pursuing medical school as a non-traditional student.
+A comprehensive Java console application that calculates the true financial opportunity cost of pursuing medical school as a non-traditional student, featuring persistent defaults, inflation modeling, and professional-grade financial analysis.
 
 ## Overview
 
@@ -22,11 +22,19 @@ This calculator provides a detailed financial analysis for aspiring physicians, 
 
 ### Advanced Financial Modeling
 - **Daily compounding**: Both loan interest and investment returns use daily compounding for accuracy
+- **Inflation modeling**: Physician salaries grow at max(raises, inflation) while alternatives grow at raise rate only
 - **Timeline-based calculations**: Accounts for actual matriculation timing and career progression
 - **Configurable retirement age**: Projects missed contributions to your selected retirement age
 - **Flexible loan repayment**: Standard terms or auto-aligned to retirement age
 - **Salary growth modeling**: Annual raises applied throughout career timeline
 - **Input validation**: Robust error handling and bounds checking for all user inputs
+
+### Professional Features
+- **Persistent defaults system**: Save and customize all default values for repeated use
+- **TL;DR results summary**: Key metrics displayed upfront for quick analysis
+- **Professional formatting**: Currency formatting with thousands separators
+- **Actionable warnings**: Specific guidance when break-even exceeds retirement age
+- **Economic sophistication**: Inflation-adjusted salary growth modeling
 
 ### Detailed Cost Breakdown
 - Direct opportunity cost (lost wages)
@@ -50,7 +58,12 @@ java Main
 ```
 
 ### Interactive Input
-The application will prompt for the following information:
+The application features a main menu with three options:
+1. **Calculate Opportunity Cost** - Run the financial analysis
+2. **Set Defaults** - Customize default values that persist between sessions  
+3. **Exit** - Quit the application
+
+For calculations, the application will prompt for the following information:
 
 1. **Personal Information**
    - Current age
@@ -65,6 +78,7 @@ The application will prompt for the following information:
 3. **Medical School Planning**
    - Years until starting medical school (if no post-bacc)
    - Expected annual salary raises
+   - **Expected inflation rate** (new feature)
    - Student loan interest rate
    - Total medical school loan amount
 
@@ -100,22 +114,29 @@ java Main < sample_inputs/early_retirement.txt  # See impact of early retirement
 ## Sample Output
 
 ```
-=== OPPORTUNITY COST ANALYSIS ===
+=== RESULTS (TL;DR) ===
+Total Opportunity Cost             : $2,225,336
+Estimated Break-even Age           : 55 years
+Selected Retirement Age            : 65 years
+Monthly Loan Payment               : $7,084/mo
+----------------------------------------
+
 Training path: 2 years post-bacc + 4 years med school + 3 years residency + 2 years fellowship
 Age when starting as physician: 43 years old
 Timeline: Start post-bacc at age 31, med school at age 34
 Retirement assumptions: 15% contribution rate, 7% annual return (daily compounding)
+Economic assumption: 3% inflation (MD raises are floored at inflation)
 ----------------------------------------
-Direct opportunity cost (lost wages): $722,005.08
-Lost retirement savings (projected to age 65): $865,292.96
-Post-bacc loans: $60,000.00
-Medical school loans: $300,000.00
-Total loan interest (daily compounding with deferment): $278,037.91
-Total loan balance at repayment start: $638,037.91
-Monthly loan payment (10-year repayment): $7,083.53
-Annual loan payment burden: $85,002.35
+Direct opportunity cost (lost wages): $722,005
+Lost retirement savings (projected to age 65): $865,293
+Post-bacc loans: $60,000
+Medical school loans: $300,000
+Total loan interest (daily compounding with deferment): $278,038
+Total loan balance at repayment start: $638,038
+Monthly loan payment (10-year repayment): $7,084/mo
+Annual loan payment burden: $85,002
 ----------------------------------------
-TOTAL OPPORTUNITY COST: $2,225,335.94
+TOTAL OPPORTUNITY COST: $2,225,336
 ESTIMATED BREAK-EVEN AGE: 55 years old
 Years of physician earnings until retirement: 22 years
 Retirement losses represent 38.9% of total opportunity cost
@@ -145,10 +166,17 @@ Future Value = Missed_Contribution × (1 + daily_rate)^days_until_retirement
 
 ### Break-Even Analysis
 The calculator determines when cumulative physician earnings exceed the non-MD career path plus total opportunity costs, accounting for:
-- Continued salary growth in both career paths
+- Continued salary growth in both career paths with **inflation floors for physician salaries**
 - **Monthly loan payments** reducing net physician income during repayment period
 - Complete loan payoff after the specified repayment period
 - **Configurable retirement age** affecting total earning years and retirement projections
+
+### Inflation Modeling
+A sophisticated feature that recognizes economic reality:
+- **Physician salaries** grow at `max(expected_raises, inflation_rate)` 
+- **Alternative career salaries** grow at `expected_raises` only
+- Reflects that medical careers typically maintain purchasing power over time
+- Higher inflation scenarios tend to favor the medical career path
 
 ## Key Assumptions
 
@@ -172,9 +200,9 @@ non_trad_md_opportunity_cost_calc/
 │       ├── Main.java          # Application entry point and menu system
 │       └── MDCalc.java        # Core calculation engine and financial modeling
 ├── sample_inputs/
-│   ├── INPUT_GUIDE.md         # Detailed parameter explanations
-│   ├── traditional_path.txt   # Standard retirement (65)
-│   ├── postbacc_fellowship.txt # Complex training path
+│   ├── INPUT_GUIDE.md         # Detailed parameter explanations & Set Defaults guide
+│   ├── traditional_path.txt   # Standard retirement (65), with inflation modeling
+│   ├── postbacc_fellowship.txt # Complex training path, inflation-adjusted
 │   ├── nontraditional_no_postbacc.txt # Late retirement (70), auto-aligned loans
 │   └── early_retirement.txt   # Early retirement (55), high opportunity cost
 └── README.md                  # This file
@@ -187,6 +215,7 @@ non_trad_md_opportunity_cost_calc/
 - **v3.0**: Implemented post-bacc program support and timeline-based calculations
 - **v4.0**: Enhanced with daily compounding for all financial calculations
 - **v5.0**: Added configurable retirement age, auto-aligned loan repayment, robust input validation
+- **v6.0**: **Major release** - Persistent defaults system, inflation modeling, TL;DR results, professional formatting
 
 ## Contributing
 
