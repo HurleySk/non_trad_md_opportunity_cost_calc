@@ -94,9 +94,11 @@ public class MDCalc {
         if (tmpSalary > 0) this.currentSalary = tmpSalary;
         if (this.currentSalary < 0) this.currentSalary = 0;
 
-        System.out.printf("Will you need to do a post-bacc program? [%s] (y/n): ", this.needsPostBacc ? "y" : "n");
+        System.out.printf("Will you need to do a post-bacc program? [%s] (y/n, 0=keep default): ", this.needsPostBacc ? "y" : "n");
         String postBaccResponse = input.next().toLowerCase();
-        this.needsPostBacc = postBaccResponse.startsWith("y");
+        if (!postBaccResponse.equals("0")) {
+            this.needsPostBacc = postBaccResponse.startsWith("y");
+        }
 
         if (this.needsPostBacc) {
             System.out.printf("How many years until you start post-bacc? [%d] (enter 0 to keep default): ", this.yearsUntilPostBacc);
@@ -121,18 +123,24 @@ public class MDCalc {
             if (tmpYearsUntilMed > 0) this.yearsUntilMedSchool = tmpYearsUntilMed;
         }
 
-        System.out.printf("Enter your expected annual raise percentage [%.1f%%] (e.g., 3 for 3%%): ", this.annualRaise * 100);
-        double tmpAnnualRaise = input.nextDouble() / 100.0;
-        if (tmpAnnualRaise >= 0 && tmpAnnualRaise <= 1) this.annualRaise = tmpAnnualRaise;
-        if (this.annualRaise < 0) this.annualRaise = 0;
-        if (this.annualRaise > 1) this.annualRaise = 1;
+        System.out.printf("Enter your expected annual raise percentage [%.1f%%] (e.g., 3 for 3%%, enter 0 to keep default): ", this.annualRaise * 100);
+        double tmpAnnualRaisePct = input.nextDouble();
+        if (tmpAnnualRaisePct > 0) {
+            double tmpAnnualRaise = tmpAnnualRaisePct / 100.0;
+            if (tmpAnnualRaise < 0) tmpAnnualRaise = 0;
+            if (tmpAnnualRaise > 1) tmpAnnualRaise = 1;
+            this.annualRaise = tmpAnnualRaise;
+        }
 
         // New: inflation rate to ensure physician raises at least match inflation
-        System.out.printf("Enter expected inflation rate [%.1f%%] (e.g., 3 for 3%%): ", this.inflationRate * 100);
-        double tmpInflationRate = input.nextDouble() / 100.0;
-        if (tmpInflationRate >= 0 && tmpInflationRate <= 1) this.inflationRate = tmpInflationRate;
-        if (this.inflationRate < 0) this.inflationRate = 0;
-        if (this.inflationRate > 1) this.inflationRate = 1;
+        System.out.printf("Enter expected inflation rate [%.1f%%] (e.g., 3 for 3%%, enter 0 to keep default): ", this.inflationRate * 100);
+        double tmpInflationPct = input.nextDouble();
+        if (tmpInflationPct > 0) {
+            double tmpInflationRate = tmpInflationPct / 100.0;
+            if (tmpInflationRate < 0) tmpInflationRate = 0;
+            if (tmpInflationRate > 1) tmpInflationRate = 1;
+            this.inflationRate = tmpInflationRate;
+        }
 
         System.out.printf("Enter average interest rate on medical school loans [%.1f%%] (e.g., 6 for 6%%): ", this.loanInterestRate * 100);
         double tmpLoanInterestRate = input.nextDouble() / 100.0;
@@ -464,7 +472,16 @@ public class MDCalc {
         double totalLoanBalance = result.getTotalLoans() + result.getLoanInterest();
         System.out.printf("Total loan balance at repayment start: $%,.2f%n", totalLoanBalance);
         System.out.printf("Monthly loan payment (%d-year repayment): $%,.2f/mo%n", loanRepaymentYears, monthlyLoanPayment);
-        System.out.printf("Annual loan payment burden: $%,.2f%n", monthlyLoanPayment * 12);
+        double annualLoanPayment = monthlyLoanPayment * 12;
+        System.out.printf("Annual loan payment burden: $%,.2f%n", annualLoanPayment);
+        // Warn if annual loan repayment exceeds half of first-year physician income
+        double firstYearPhysicianIncome = physicianStartingSalary;
+        if (annualLoanPayment > 0.5 * firstYearPhysicianIncome) {
+            double percentOfIncome = (annualLoanPayment / firstYearPhysicianIncome) * 100.0;
+            System.out.printf("WARNING: Annual loan payment is %.1f%% of your first-year physician income (>%s).%n",
+                    percentOfIncome, "50% threshold");
+            System.out.println("Consider extending the repayment timeline, lowering interest rate, or adjusting debt to reduce burden.");
+        }
         System.out.println("----------------------------------------");
         System.out.printf("TOTAL OPPORTUNITY COST: $%,.2f%n", result.getTotalCost());
         System.out.printf("ESTIMATED BREAK-EVEN AGE: %d years old%n", result.getBreakEvenAge());
