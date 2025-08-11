@@ -26,6 +26,7 @@ Total Opportunity Cost: $1,605,193
 Break-even age: 43 years old
 Retirement losses: 50.6% of total cost
 Years of physician earnings until retirement: 32 years
+Loan repayment: 10-year standard term with amortized interest
 ```
 
 ### Early Retirement FIRE (Age 28, Retire at 55)
@@ -37,6 +38,7 @@ Break-even age: 50+ years old
 Retirement losses: 60%+ of total cost
 Years of physician earnings until retirement: 18 years
 WARNING: Break-even point may exceed retirement age!
+Loan repayment: Auto-aligned to retirement age for lower monthly burden
 ```
 
 ### Late Retirement (Age 32, Retire at 70, Auto-Aligned Loans)
@@ -48,6 +50,7 @@ Break-even age: 45 years old
 Retirement losses: 35% of total cost  
 Years of physician earnings until retirement: 32 years
 Loan term extended to retirement (32 years) - lower monthly payments
+Enhanced loan modeling shows complete amortization over extended term
 ```
 
 ### Key Insights from Comparison
@@ -57,6 +60,7 @@ Loan term extended to retirement (32 years) - lower monthly payments
 - **Retirement losses**: Represent 35-60% of total opportunity cost depending on retirement age
 - **Loan strategy**: Auto-aligned loans reduce monthly burden but may increase total cost
 - **Career length**: More earning years dramatically reduces opportunity cost
+- **Enhanced loan modeling**: Now captures both deferment and repayment phase interest accurately
 
 ## Interactive vs Batch Mode
 
@@ -65,6 +69,7 @@ Best for exploring different scenarios and understanding input impact:
 ```bash
 java Main
 # Follow prompts to input your specific situation
+# Choose between quick calculation (defaults) or full input review
 ```
 
 ### Batch Mode  
@@ -93,6 +98,12 @@ java Main < ../../sample_inputs/postbacc_fellowship.txt > complex_path.txt
 - **Investment assumptions**: Higher returns increase retirement opportunity cost
 - **Specialty training**: Longer residency/fellowship vs higher attending salary
 
+### **NEW**: Enhanced Loan Repayment Options
+- **Standard repayment**: Traditional 10-year term with full amortization
+- **Auto-aligned loans**: Extend term to retirement age for lower monthly payments
+- **Monthly payment simulation**: See exactly how each payment reduces principal
+- **Repayment burden analysis**: Get warnings when loans exceed 50% of physician income
+
 ## Understanding Output Sensitivity
 
 The calculator is most sensitive to:
@@ -105,7 +116,15 @@ The calculator is most sensitive to:
 Moderately sensitive to:
 - **Loan repayment strategy** (auto-aligned vs standard terms)
 - **Annual raise assumptions** (affects projected salary growth)
+- **Inflation rate** (affects physician vs alternative career salary growth)
 
 Less sensitive to:
 - **Loan interest rates** (important but smaller portion of total)
 - **Residency/fellowship pay** (reduces but doesn't eliminate opportunity cost)
+
+### **NEW**: Loan Repayment Impact
+The enhanced loan modeling now shows:
+- **Monthly payment details**: Exact amount going to principal vs interest
+- **Total repayment cost**: Complete picture including both deferment and repayment interest
+- **Burden analysis**: Clear warnings about loan payment impact on physician income
+- **Auto-alignment benefits**: Compare monthly payments between standard and extended terms

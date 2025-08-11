@@ -12,17 +12,24 @@ import java.util.Properties;
  */
 public class DefaultsManager {
     private static final String FILE_NAME = "mdcalc.defaults.properties";
-
     private static Properties props = null;
+    private static Path resolvedPath = null;
 
     private static synchronized Properties getProps() {
         if (props == null) {
             props = new Properties();
-            Path p = Paths.get(FILE_NAME);
-            if (Files.exists(p)) {
-                try (FileInputStream fis = new FileInputStream(p.toFile())) {
+            resolvedPath = resolveDefaultsPath();
+            if (resolvedPath != null && Files.exists(resolvedPath)) {
+                try (FileInputStream fis = new FileInputStream(resolvedPath.toFile())) {
                     props.load(fis);
-                } catch (IOException ignored) {
+                } catch (IOException ignored) { }
+            } else {
+                // Fall back to current working directory
+                resolvedPath = Paths.get(FILE_NAME);
+                if (Files.exists(resolvedPath)) {
+                    try (FileInputStream fis = new FileInputStream(resolvedPath.toFile())) {
+                        props.load(fis);
+                    } catch (IOException ignored) { }
                 }
             }
         }
@@ -30,10 +37,29 @@ public class DefaultsManager {
     }
 
     public static void save() {
-        try (FileOutputStream fos = new FileOutputStream(FILE_NAME)) {
+        Path target = (resolvedPath != null) ? resolvedPath : Paths.get(FILE_NAME);
+        try (FileOutputStream fos = new FileOutputStream(target.toFile())) {
             getProps().store(fos, "MDCalc default settings");
         } catch (IOException ignored) {
         }
+    }
+
+    // Determine a stable location for the defaults file:
+    // 1) Current working directory
+    // 2) Parent directory (useful when running from CostCalc/src)
+    // 3) Otherwise return cwd path
+    private static Path resolveDefaultsPath() {
+        Path cwd = Paths.get("").toAbsolutePath().normalize();
+        Path inCwd = cwd.resolve(FILE_NAME);
+        if (Files.exists(inCwd)) return inCwd;
+
+        Path parent = cwd.getParent();
+        if (parent != null) {
+            Path inParent = parent.resolve(FILE_NAME);
+            if (Files.exists(inParent)) return inParent;
+        }
+
+        return inCwd; // default to cwd
     }
 
     // Generic getters/setters with defaults
@@ -100,7 +126,7 @@ public class DefaultsManager {
         public static final String YEARS_UNTIL_MED_SCHOOL = "yearsUntilMedSchool";
         public static final String TOTAL_LOANS = "totalLoans";
         public static final String LOAN_REPAYMENT_YEARS = "loanRepaymentYears";
-        public static final String MONTHLY_LOAN_PAYMENT = "monthlyLoanPayment";
+        // monthly payment removed from user-set defaults; it is auto-calculated
         public static final String RETIREMENT_AGE = "retirementAge";
         public static final String ANNUAL_RAISE = "annualRaise"; // fraction
         public static final String LOAN_INTEREST_RATE = "loanInterestRate"; // fraction
@@ -144,7 +170,7 @@ public class DefaultsManager {
             case Keys.POST_BACC_COST:
                 return (value >= 10000 && value <= 200000) ? value : def;
             case Keys.TOTAL_LOANS:
-                return (value >= 50000 && value <= 500000) ? value : def;
+                return (value >= 0 && value <= 1500000) ? value : def;
             case Keys.RETIREMENT_CONTRIB_RATE:
                 return (value >= 0.05 && value <= 0.50) ? value : def;
             case Keys.INVESTMENT_RETURN_RATE:
@@ -155,8 +181,7 @@ public class DefaultsManager {
                 return (value >= 0.0 && value <= 0.20) ? value : def;
             case Keys.LOAN_INTEREST_RATE:
                 return (value >= 0.0 && value <= 0.15) ? value : def;
-            case Keys.MONTHLY_LOAN_PAYMENT:
-                return (value >= 0.0) ? value : def;
+            // monthly payment is not user-set; no validation needed
             default:
                 return value;
         }

@@ -75,8 +75,9 @@ public class MDCalc {
             this.yearsUntilPostBacc = DefaultsManager.getInt(DefaultsManager.Keys.YEARS_UNTIL_POST_BACC, this.yearsUntilPostBacc);
             this.yearsUntilMedSchool = DefaultsManager.getInt(DefaultsManager.Keys.YEARS_UNTIL_MED_SCHOOL, this.yearsUntilMedSchool);
             this.totalLoans = DefaultsManager.getDouble(DefaultsManager.Keys.TOTAL_LOANS, this.totalLoans);
+            this.totalLoans = DefaultsManager.getDouble(DefaultsManager.Keys.TOTAL_LOANS, this.totalLoans);
             this.loanRepaymentYears = DefaultsManager.getInt(DefaultsManager.Keys.LOAN_REPAYMENT_YEARS, this.loanRepaymentYears);
-            this.monthlyLoanPayment = DefaultsManager.getDouble(DefaultsManager.Keys.MONTHLY_LOAN_PAYMENT, this.monthlyLoanPayment);
+            // monthlyLoanPayment is derived; no default to load
             this.retirementAge = DefaultsManager.getInt(DefaultsManager.Keys.RETIREMENT_AGE, this.retirementAge);
             this.annualRaise = DefaultsManager.getDouble(DefaultsManager.Keys.ANNUAL_RAISE, this.annualRaise);
             this.loanInterestRate = DefaultsManager.getDouble(DefaultsManager.Keys.LOAN_INTEREST_RATE, this.loanInterestRate);
@@ -337,9 +338,8 @@ public class MDCalc {
             for (int year = 1; year <= postBaccYears; year++) {
                 currentYear++;
                 double yearlyOpportunityCost = currentYearSalary;
-                // Fix: Use more realistic retirement contribution assumption during training
-                // Assume they would contribute a fixed percentage of their pre-training salary
-                double missedRetirementContribution = currentYearSalary * retirementContributionRate * 0.5; // Reduced during training
+                // Missed retirement contributions equal what would have been contributed on the alternative salary
+                double missedRetirementContribution = currentYearSalary * retirementContributionRate;
 
                 // Calculate lost retirement growth to selected retirement age
                 int yearsToGrow = yearsUntilRetirement - currentYear + 1;
@@ -350,13 +350,12 @@ public class MDCalc {
                 }
 
                 totalOpportunityCost += yearlyOpportunityCost;
-                // Fix: Apply inflation-adjusted salary growth consistently
-                currentYearSalary *= (1 + Math.max(annualRaise, inflationRate));
+                // Alternative career salary grows by expected raises only
+                currentYearSalary *= (1 + annualRaise);
             }
 
-            // Fix: More realistic post-bacc loan interest calculation
-            // Assume 6-month grace period after post-bacc before interest starts
-            double yearsForPostBaccInterest = Math.max(0, yearsUntilMedSchool - 0.5) + medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0);
+            // Post-bacc loan interest accrues during post-bacc through end of training path
+            double yearsForPostBaccInterest = postBaccYears + yearsUntilMedSchool + medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0);
             double dailyRate = loanInterestRate / 365.0;
             int daysForPostBaccInterest = (int)(yearsForPostBaccInterest * 365);
             if (daysForPostBaccInterest > 0) {
@@ -366,7 +365,7 @@ public class MDCalc {
             // Years between post-bacc and med school (working again)
             for (int year = 1; year <= yearsUntilMedSchool; year++) {
                 currentYear++;
-                currentYearSalary *= (1 + Math.max(annualRaise, inflationRate));
+                currentYearSalary *= (1 + annualRaise);
             }
         }
 
@@ -374,8 +373,8 @@ public class MDCalc {
         for (int year = 1; year <= medSchoolYears; year++) {
             currentYear++;
             double yearlyOpportunityCost = currentYearSalary;
-            // Fix: Use more realistic retirement contribution assumption during training
-            double missedRetirementContribution = currentYearSalary * retirementContributionRate * 0.5; // Reduced during training
+            // Missed retirement contributions equal what would have been contributed on the alternative salary
+            double missedRetirementContribution = currentYearSalary * retirementContributionRate;
 
             int yearsToGrow = yearsUntilRetirement - currentYear + 1;
             if (yearsToGrow > 0) {
@@ -385,19 +384,15 @@ public class MDCalc {
             }
 
             totalOpportunityCost += yearlyOpportunityCost;
-            // Fix: Apply inflation-adjusted salary growth consistently
-            currentYearSalary *= (1 + Math.max(annualRaise, inflationRate));
+            currentYearSalary *= (1 + annualRaise);
         }
 
         // Phase 4: Residency years
         for (int year = 1; year <= residencyYears; year++) {
             currentYear++;
             double yearlyOpportunityCost = currentYearSalary - residencySalary;
-            // Fix: More realistic retirement contribution during residency
-            // Assume they contribute based on actual income, not missed opportunity
-            double actualRetirementContribution = residencySalary * retirementContributionRate;
-            double missedRetirementContribution = currentYearSalary * retirementContributionRate * 0.3; // Reduced opportunity cost
-            double netMissedContribution = missedRetirementContribution - actualRetirementContribution;
+            // Net missed retirement contributions are the contribution gap between paths
+            double netMissedContribution = (currentYearSalary - residencySalary) * retirementContributionRate;
 
             int yearsToGrow = yearsUntilRetirement - currentYear + 1;
             if (yearsToGrow > 0) {
@@ -407,8 +402,7 @@ public class MDCalc {
             }
 
             totalOpportunityCost += yearlyOpportunityCost;
-            // Fix: Apply inflation-adjusted salary growth consistently
-            currentYearSalary *= (1 + Math.max(annualRaise, inflationRate));
+            currentYearSalary *= (1 + annualRaise);
         }
 
         // Phase 5: Fellowship years (if needed)
@@ -416,10 +410,8 @@ public class MDCalc {
             for (int year = 1; year <= fellowshipYears; year++) {
                 currentYear++;
                 double yearlyOpportunityCost = currentYearSalary - fellowshipSalary;
-                // Fix: More realistic retirement contribution during fellowship
-                double actualRetirementContribution = fellowshipSalary * retirementContributionRate;
-                double missedRetirementContribution = currentYearSalary * retirementContributionRate * 0.3; // Reduced opportunity cost
-                double netMissedContribution = missedRetirementContribution - actualRetirementContribution;
+                // Net missed retirement contributions are the contribution gap between paths
+                double netMissedContribution = (currentYearSalary - fellowshipSalary) * retirementContributionRate;
 
                 int yearsToGrow = yearsUntilRetirement - currentYear + 1;
                 if (yearsToGrow > 0) {
@@ -429,14 +421,12 @@ public class MDCalc {
                 }
 
                 totalOpportunityCost += yearlyOpportunityCost;
-                // Fix: Apply inflation-adjusted salary growth consistently
-                currentYearSalary *= (1 + Math.max(annualRaise, inflationRate));
+                currentYearSalary *= (1 + annualRaise);
             }
         }
 
-        // Fix: More realistic medical school loan interest calculation
-        // Assume 6-month grace period after graduation before interest starts
-        double yearsForMedSchoolInterest = Math.max(0, residencyYears - 0.5) + (needsFellowship ? fellowshipYears : 0);
+        // Medical school loan interest accrues during med school through end of training path
+        double yearsForMedSchoolInterest = medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0);
         double dailyLoanRate = loanInterestRate / 365.0;
         int daysForMedSchoolInterest = (int)(yearsForMedSchoolInterest * 365);
         if (daysForMedSchoolInterest > 0) {
@@ -549,6 +539,7 @@ public class MDCalc {
     }
 
     private int calculateBreakEvenAge(double totalCost, double projectedSalaryAfterTraining) {
+        // Use end-of-training alternative salary as baseline for counterfactual path
         double physicianSalary = physicianStartingSalary;
         double nonMDSalary = projectedSalaryAfterTraining;
         double cumulativeDifference = -totalCost;
@@ -566,6 +557,7 @@ public class MDCalc {
             double annualDifference = physicianNetIncome - nonMDSalary;
             cumulativeDifference += annualDifference;
 
+            // Physician salaries grow with max(raises, inflation); counterfactual grows with raises only
             physicianSalary *= (1 + Math.max(annualRaise, inflationRate));
             nonMDSalary *= (1 + annualRaise);
         }

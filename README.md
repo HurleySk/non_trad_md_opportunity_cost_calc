@@ -1,16 +1,17 @@
 # Medical School Opportunity Cost Calculator
 
-A comprehensive Java console application that calculates the true financial opportunity cost of pursuing medical school as a non-traditional student, featuring persistent defaults, inflation modeling, and professional-grade financial analysis.
+A comprehensive Java console application that calculates the true financial opportunity cost of pursuing medical school as a non-traditional student, featuring persistent defaults, inflation modeling, professional-grade financial analysis, and sophisticated loan repayment simulation.
 
 ## Overview
 
 This calculator provides a detailed financial analysis for aspiring physicians, accounting for:
 - **Lost wages** during training years
-- **Retirement savings opportunity costs** with compound growth projections
-- **Student loan interest** with daily compounding and proper deferment periods
-- **Loan repayment burden** with configurable repayment terms and monthly payments
+- **Retirement savings opportunity costs** with compound growth projections to configurable retirement age
+- **Student loan interest** with daily compounding, proper deferment periods, and **amortized repayment-phase interest**
+- **Loan repayment burden** with configurable repayment terms, monthly payments, and **auto-alignment to retirement age**
 - **Post-bacc program costs** and timeline impacts
 - **Break-even analysis** accounting for ongoing loan payments until loans are paid off
+- **Inflation modeling** that recognizes economic reality in medical career progression
 
 ## Features
 
@@ -21,27 +22,36 @@ This calculator provides a detailed financial analysis for aspiring physicians, 
 - **Fellowship**: Optional subspecialty training with extended timeline
 
 ### Advanced Financial Modeling
-- **Daily compounding**: Both loan interest and investment returns use daily compounding for accuracy
+- **Daily compounding**: Both loan interest and investment returns use daily compounding for maximum accuracy
 - **Inflation modeling**: Physician salaries grow at max(raises, inflation) while alternatives grow at raise rate only
 - **Timeline-based calculations**: Accounts for actual matriculation timing and career progression
-- **Configurable retirement age**: Projects missed contributions to your selected retirement age
-- **Flexible loan repayment**: Standard terms or auto-aligned to retirement age
-- **Salary growth modeling**: Annual raises applied throughout career timeline
+- **Configurable retirement age**: Projects missed contributions to your selected retirement age (default: 65)
+- **Flexible loan repayment**: Standard terms or auto-aligned to retirement age for optimal planning
+- **Salary growth modeling**: Annual raises applied throughout career timeline with inflation floors
 - **Input validation**: Robust error handling and bounds checking for all user inputs
 
+### **NEW**: Enhanced Loan Repayment Simulation
+- **Amortized interest calculations**: Properly models interest accrual during repayment phase
+- **Monthly payment simulation**: Detailed month-by-month loan payoff tracking
+- **Auto-aligned repayment**: Option to extend loan term to retirement age for lower monthly burden
+- **Repayment burden analysis**: Warnings when loan payments exceed 50% of first-year physician income
+- **Complete interest tracking**: Captures both deferment and repayment phase interest
+
 ### Professional Features
-- **Persistent defaults system**: Save and customize all default values for repeated use
+- **Persistent defaults system**: Save and customize all default values for repeated use with validation
 - **TL;DR results summary**: Key metrics displayed upfront for quick analysis
-- **Professional formatting**: Currency formatting with thousands separators
+- **Professional formatting**: Currency formatting with thousands separators and proper percentage display
 - **Actionable warnings**: Specific guidance when break-even exceeds retirement age
-- **Economic sophistication**: Inflation-adjusted salary growth modeling
+- **Economic sophistication**: Inflation-adjusted salary growth modeling with realistic assumptions
+- **Comprehensive menu system**: Easy navigation between calculation, defaults management, and exit
 
 ### Detailed Cost Breakdown
 - Direct opportunity cost (lost wages)
-- Lost retirement savings (projected to retirement)
-- Student loan principal and interest
+- Lost retirement savings (projected to selected retirement age)
+- Student loan principal and interest (deferment + repayment phases)
 - Post-bacc program costs
 - Total opportunity cost with break-even age analysis
+- Loan repayment burden and monthly payment details
 
 ## How to Use
 
@@ -59,43 +69,47 @@ java Main
 
 ### Interactive Input
 The application features a main menu with three options:
-1. **Calculate Opportunity Cost** - Run the financial analysis
-2. **Set Defaults** - Customize default values that persist between sessions  
+1. **Calculate Opportunity Cost** - Run the financial analysis with choice of defaults or custom input
+2. **Set Defaults** - Customize default values that persist between sessions with comprehensive validation
 3. **Exit** - Quit the application
 
-For calculations, the application will prompt for the following information:
+For calculations, the application offers two modes:
+- **Quick calculation** using current defaults
+- **Full input review** with ability to modify any parameter
+
+The application will prompt for the following information:
 
 1. **Personal Information**
-   - Current age
-   - Current annual salary
+   - Current age (18-70, with validation)
+   - Current annual salary ($20K-$1M, with validation)
 
 2. **Post-Bacc Program (if applicable)**
-   - Years until starting post-bacc
-   - Duration of post-bacc program
-   - Total cost of post-bacc program
-   - Gap years between post-bacc and medical school
+   - Years until starting post-bacc (0-10, with validation)
+   - Duration of post-bacc program (1-4 years, with validation)
+   - Total cost of post-bacc program ($10K-$200K, with validation)
+   - Gap years between post-bacc and medical school (0-5, with validation)
 
 3. **Medical School Planning**
-   - Years until starting medical school (if no post-bacc)
-   - Expected annual salary raises
-   - **Expected inflation rate** (new feature)
-   - Student loan interest rate
-   - Total medical school loan amount
+   - Years until starting medical school (if no post-bacc, 0-10, with validation)
+   - Expected annual salary raises (0-20%, with validation)
+   - **Expected inflation rate** (0-15%, with validation) - critical for realistic modeling
+   - Student loan interest rate (0-15%, with validation)
+   - Total medical school loan amount ($50K-$500K, with validation)
 
 4. **Residency and Fellowship**
-   - Years of residency training
-   - Residency salary confirmation
-   - Fellowship requirements and duration
-   - Fellowship salary confirmation
-   - Expected starting physician salary
+   - Years of residency training (3-7 years, with validation)
+   - Residency salary confirmation ($40K-$80K, with validation)
+   - Fellowship requirements and duration (1-4 years, with validation)
+   - Fellowship salary confirmation ($60K-$120K, with validation)
+   - Expected starting physician salary ($150K-$800K, with validation)
 
 5. **Financial Assumptions**
-   - Retirement contribution rate (default: 15%)
-   - Investment return rate (default: 7%)
-   - Retirement age (default: 65, fully configurable)
-   - Loan repayment period (default: 10 years)
-   - Monthly loan payment (auto-calculated if not specified)
-   - Auto-align loan payoff to retirement age (optional)
+   - Retirement contribution rate (5-50%, default: 15%, with validation)
+   - Investment return rate (3-15%, default: 7%, with validation)
+   - Retirement age (50-80, default: 65, fully configurable, with validation)
+   - Loan repayment period (5-30 years, default: 10 years, with validation)
+   - Monthly loan payment (auto-calculated using standard loan payment formula)
+   - Auto-align loan payoff to retirement age (optional feature for optimal planning)
 
 ### Sample Input Files
 Four sample scenarios are provided in the `sample_inputs/` directory:
@@ -131,7 +145,7 @@ Direct opportunity cost (lost wages): $722,005
 Lost retirement savings (projected to age 65): $865,293
 Post-bacc loans: $60,000
 Medical school loans: $300,000
-Total loan interest (daily compounding with deferment): $278,038
+Total loan interest (deferment + repayment): $278,038
 Total loan balance at repayment start: $638,038
 Monthly loan payment (10-year repayment): $7,084/mo
 Annual loan payment burden: $85,002
@@ -147,7 +161,8 @@ Retirement losses represent 38.9% of total opportunity cost
 ### Interest Calculations
 All interest calculations use **daily compounding** for maximum accuracy:
 - **Student loans**: Interest accrues daily from loan origination through deferment periods
-- **Investment returns**: Retirement contributions compound daily until retirement at age 65
+- **Investment returns**: Retirement contributions compound daily until selected retirement age
+- **Repayment phase**: Monthly loan payments are simulated with proper amortization
 
 ### Timeline Phases
 The calculator models five distinct phases:
@@ -158,8 +173,14 @@ The calculator models five distinct phases:
 4. **Residency**: Reduced opportunity cost (salary - residency pay), all loans continue accruing
 5. **Fellowship**: Reduced opportunity cost (salary - fellowship pay), all loans continue accruing
 
+### **NEW**: Enhanced Loan Repayment Modeling
+- **Monthly simulation**: Tracks each payment with proper principal/interest allocation
+- **Amortization accuracy**: Uses standard loan payment formula with daily compounding
+- **Auto-alignment**: Option to extend repayment term to retirement age for lower monthly burden
+- **Burden analysis**: Warns when annual loan payments exceed 50% of first-year physician income
+
 ### Retirement Opportunity Cost
-Each missed retirement contribution is projected to retirement age (65) using daily compounding:
+Each missed retirement contribution is projected to selected retirement age using daily compounding:
 ```
 Future Value = Missed_Contribution × (1 + daily_rate)^days_until_retirement
 ```
@@ -180,12 +201,13 @@ A sophisticated feature that recognizes economic reality:
 
 ## Key Assumptions
 
-- **Retirement age**: User-configurable (default: 65 years old)
+- **Retirement age**: User-configurable (default: 65 years old, range: 50-80)
 - **Loan deferment**: Interest accrues but no payments during training
 - **Daily compounding**: 365 days per year for all financial calculations
-- **Salary growth**: Applied consistently throughout timeline
+- **Salary growth**: Applied consistently throughout timeline with inflation floors
 - **Career progression**: Immediate transition between training phases
 - **Input validation**: Automatic bounds checking prevents invalid entries
+- **Loan repayment**: Standard amortization with option for retirement-age alignment
 
 ## Educational Purpose
 
@@ -197,15 +219,19 @@ This calculator is designed for **educational and planning purposes only**. Fina
 non_trad_md_opportunity_cost_calc/
 ├── CostCalc/
 │   └── src/
-│       ├── Main.java          # Application entry point and menu system
-│       └── MDCalc.java        # Core calculation engine and financial modeling
+│       ├── Main.java          # Application entry point and comprehensive menu system
+│       ├── MDCalc.java        # Core calculation engine and financial modeling
+│       └── DefaultsManager.java # Persistent defaults system with validation
 ├── sample_inputs/
 │   ├── INPUT_GUIDE.md         # Detailed parameter explanations & Set Defaults guide
 │   ├── traditional_path.txt   # Standard retirement (65), with inflation modeling
 │   ├── postbacc_fellowship.txt # Complex training path, inflation-adjusted
 │   ├── nontraditional_no_postbacc.txt # Late retirement (70), auto-aligned loans
 │   └── early_retirement.txt   # Early retirement (55), high opportunity cost
-└── README.md                  # This file
+├── mdcalc.defaults.properties # Persistent user defaults (auto-generated)
+├── README.md                  # This file
+├── USAGE_EXAMPLES.md          # Practical usage examples and scenarios
+└── TECHNICAL_IMPLEMENTATION.md # Detailed technical implementation guide
 ```
 
 ## Version History
@@ -216,6 +242,7 @@ non_trad_md_opportunity_cost_calc/
 - **v4.0**: Enhanced with daily compounding for all financial calculations
 - **v5.0**: Added configurable retirement age, auto-aligned loan repayment, robust input validation
 - **v6.0**: **Major release** - Persistent defaults system, inflation modeling, TL;DR results, professional formatting
+- **v6.1**: **Enhanced loan modeling** - Amortized repayment-phase interest, monthly payment simulation, repayment burden analysis
 
 ## Contributing
 
