@@ -468,6 +468,13 @@ public class MDCalc {
             }
         }
 
+        // Simulate amortization during repayment so interest compounds until payoff
+        RepaymentSummary repayment = simulateRepayment(totalLoanBalance, monthlyLoanPayment, loanInterestRate, loanRepaymentYears);
+        double repaymentPhaseInterest = repayment.totalInterest;
+
+        // Include repayment-phase interest in total loan interest
+        totalLoanInterest += repaymentPhaseInterest;
+
         double totalCost = totalOpportunityCost + cumulativeLostRetirement + totalLoanInterest + totalLoanAmount;
 
         int breakEvenAge = calculateBreakEvenAge(totalCost, currentYearSalary);
@@ -491,6 +498,54 @@ public class MDCalc {
         double denominator = Math.pow(1 + monthlyRate, totalPayments) - 1;
 
         return numerator / denominator;
+    }
+
+    private static class RepaymentSummary {
+        final double totalInterest;
+        final int monthsTaken;
+        final double finalBalance;
+
+        RepaymentSummary(double totalInterest, int monthsTaken, double finalBalance) {
+            this.totalInterest = totalInterest;
+            this.monthsTaken = monthsTaken;
+            this.finalBalance = finalBalance;
+        }
+    }
+
+    private RepaymentSummary simulateRepayment(double startingBalance, double monthlyPayment, double annualRate, int yearsPlanned) {
+        if (startingBalance <= 0 || monthlyPayment <= 0) {
+            return new RepaymentSummary(0, 0, Math.max(0, startingBalance));
+        }
+
+        double monthlyRate = annualRate / 12.0;
+        int maxMonths = Math.max(1, yearsPlanned * 12 + 120); // allow extra months due to rounding, cap runaway
+
+        double balance = startingBalance;
+        double totalInterest = 0;
+        int months = 0;
+
+        for (; months < maxMonths && balance > 0.005; months++) {
+            double interest = balance * monthlyRate;
+            totalInterest += interest;
+
+            double principal = monthlyPayment - interest;
+            if (principal <= 0) {
+                // Payment too low to amortize; bump months and break to avoid infinite loop
+                break;
+            }
+
+            if (principal >= balance) {
+                // Final payment this month
+                principal = balance;
+                balance = 0;
+                months++;
+                break;
+            }
+
+            balance -= principal;
+        }
+
+        return new RepaymentSummary(totalInterest, months, Math.max(0, balance));
     }
 
     private int calculateBreakEvenAge(double totalCost, double projectedSalaryAfterTraining) {
@@ -564,7 +619,7 @@ public class MDCalc {
             System.out.printf("Post-bacc loans: $%,.2f%n", postBaccCost);
         }
         System.out.printf("Medical school loans: $%,.2f%n", totalLoans);
-        System.out.printf("Total loan interest (daily compounding with deferment): $%,.2f%n", result.getLoanInterest());
+        System.out.printf("Total loan interest (deferment + repayment): $%,.2f%n", result.getLoanInterest());
 
         // Calculate and display loan repayment info
         double totalLoanBalance = result.getTotalLoans() + result.getLoanInterest();
