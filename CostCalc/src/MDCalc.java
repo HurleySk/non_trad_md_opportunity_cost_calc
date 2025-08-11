@@ -41,6 +41,7 @@ public class MDCalc {
         this.inflationRate = 0.03;
         this.annualRaise = 0.03; // Add missing built-in default
         this.loanInterestRate = 0.06; // Add missing built-in default
+        this.totalLoans = 300000; // Default medical school loan amount
         this.needsFellowship = false;
         this.fellowshipYears = 1;
         this.fellowshipSalary = 90000;
@@ -73,6 +74,7 @@ public class MDCalc {
             this.postBaccCost = DefaultsManager.getDouble(DefaultsManager.Keys.POST_BACC_COST, this.postBaccCost);
             this.yearsUntilPostBacc = DefaultsManager.getInt(DefaultsManager.Keys.YEARS_UNTIL_POST_BACC, this.yearsUntilPostBacc);
             this.yearsUntilMedSchool = DefaultsManager.getInt(DefaultsManager.Keys.YEARS_UNTIL_MED_SCHOOL, this.yearsUntilMedSchool);
+            this.totalLoans = DefaultsManager.getDouble(DefaultsManager.Keys.TOTAL_LOANS, this.totalLoans);
             this.loanRepaymentYears = DefaultsManager.getInt(DefaultsManager.Keys.LOAN_REPAYMENT_YEARS, this.loanRepaymentYears);
             this.monthlyLoanPayment = DefaultsManager.getDouble(DefaultsManager.Keys.MONTHLY_LOAN_PAYMENT, this.monthlyLoanPayment);
             this.retirementAge = DefaultsManager.getInt(DefaultsManager.Keys.RETIREMENT_AGE, this.retirementAge);
