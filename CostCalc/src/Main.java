@@ -47,6 +47,55 @@ public class Main {
         print("This calculator will analyze the total financial impact of pursuing medical school");
         print("including lost wages, retirement savings, and loan costs.\n");
         
+        // Ask user if they want to use defaults or enter custom values
+        print("Would you like to:");
+        print("1. Use current defaults and calculate immediately");
+        print("2. Review and confirm/modify values");
+        print("3. Go back to main menu");
+        System.out.print("Enter choice (1-3): ");
+        
+        if (!globalInput.hasNextInt()) {
+            print("Invalid input. Using defaults and calculating immediately.");
+            globalInput.nextLine(); // consume invalid input
+            calculateWithDefaults();
+            return;
+        }
+        
+        int choice = globalInput.nextInt();
+        globalInput.nextLine(); // consume newline
+        
+        if (choice == 1) {
+            // Use defaults directly
+            calculateWithDefaults();
+        } else if (choice == 2) {
+            // Go through full input process
+            calculateWithCustomInput();
+        } else if (choice == 3) {
+            // Go back to main menu
+            return;
+        } else {
+            print("Invalid choice. Using defaults and calculating immediately.");
+            calculateWithDefaults();
+        }
+    }
+
+    private static void calculateWithDefaults() {
+        print("\nUsing current defaults for calculation...");
+        
+        MDCalc calculator = new MDCalc();
+        // Calculator already loads defaults in constructor, so we can proceed directly
+        
+        MDCalc.OpportunityCostResult result = calculator.calculateOpportunityCost();
+        calculator.displayResults(result);
+        
+        print("\nPress Enter to continue...");
+        globalInput.nextLine(); // consume remaining newline
+        globalInput.nextLine(); // wait for user input
+    }
+
+    private static void calculateWithCustomInput() {
+        print("\nPlease review and confirm/modify the following values:");
+        
         MDCalc calculator = new MDCalc();
         calculator.collectUserInput(globalInput);
         

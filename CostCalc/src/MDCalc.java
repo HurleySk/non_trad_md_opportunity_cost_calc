@@ -87,12 +87,18 @@ public class MDCalc {
         System.out.printf("Enter your current age [%d] (enter 0 to keep default): ", this.currentAge);
         int tmpAge = input.nextInt();
         if (tmpAge > 0) this.currentAge = tmpAge;
-        if (this.currentAge < 0) this.currentAge = 0;
+        if (this.currentAge < 18 || this.currentAge > 70) {
+            System.out.println("WARNING: Age should be between 18-70. Adjusting to valid range.");
+            this.currentAge = Math.max(18, Math.min(70, this.currentAge));
+        }
 
         System.out.printf("Enter your current annual salary [$%.0f] (enter 0 to keep default): $", this.currentSalary);
         double tmpSalary = input.nextDouble();
         if (tmpSalary > 0) this.currentSalary = tmpSalary;
-        if (this.currentSalary < 0) this.currentSalary = 0;
+        if (this.currentSalary < 20000 || this.currentSalary > 1000000) {
+            System.out.println("WARNING: Salary should be between $20K-$1M. Adjusting to valid range.");
+            this.currentSalary = Math.max(20000, Math.min(1000000, this.currentSalary));
+        }
 
         System.out.printf("Will you need to do a post-bacc program? [%s] (y/n, 0=keep default): ", this.needsPostBacc ? "y" : "n");
         String postBaccResponse = input.next().toLowerCase();
@@ -104,23 +110,42 @@ public class MDCalc {
             System.out.printf("How many years until you start post-bacc? [%d] (enter 0 to keep default): ", this.yearsUntilPostBacc);
             int tmpYearsUntilPostBacc = input.nextInt();
             if (tmpYearsUntilPostBacc > 0) this.yearsUntilPostBacc = tmpYearsUntilPostBacc;
+            if (this.yearsUntilPostBacc < 0 || this.yearsUntilPostBacc > 10) {
+                System.out.println("WARNING: Years until post-bacc should be 0-10. Adjusting to valid range.");
+                this.yearsUntilPostBacc = Math.max(0, Math.min(10, this.yearsUntilPostBacc));
+            }
 
             System.out.printf("How many years will post-bacc take? [%d] (enter 0 to keep default): ", this.postBaccYears);
             int tmpPostBaccYears = input.nextInt();
             if (tmpPostBaccYears > 0) this.postBaccYears = tmpPostBaccYears;
+            if (this.postBaccYears < 1 || this.postBaccYears > 4) {
+                System.out.println("WARNING: Post-bacc duration should be 1-4 years. Adjusting to valid range.");
+                this.postBaccYears = Math.max(1, Math.min(4, this.postBaccYears));
+            }
 
             System.out.printf("What is the total cost of post-bacc program? [$%.0f] (enter 0 to keep default): $", this.postBaccCost);
             double tmpPostBaccCost = input.nextDouble();
             if (tmpPostBaccCost > 0) this.postBaccCost = tmpPostBaccCost;
-            if (this.postBaccCost < 0) this.postBaccCost = 0;
+            if (this.postBaccCost < 10000 || this.postBaccCost > 200000) {
+                System.out.println("WARNING: Post-bacc cost should be $10K-$200K. Adjusting to valid range.");
+                this.postBaccCost = Math.max(10000, Math.min(200000, this.postBaccCost));
+            }
 
             System.out.printf("How many years after post-bacc until medical school? [%d] (enter 0 to keep default): ", this.yearsUntilMedSchool);
             int tmpYearsUntilMedAfterPB = input.nextInt();
             if (tmpYearsUntilMedAfterPB > 0) this.yearsUntilMedSchool = tmpYearsUntilMedAfterPB;
+            if (this.yearsUntilMedSchool < 0 || this.yearsUntilMedSchool > 5) {
+                System.out.println("WARNING: Gap between post-bacc and med school should be 0-5 years. Adjusting to valid range.");
+                this.yearsUntilMedSchool = Math.max(0, Math.min(5, this.yearsUntilMedSchool));
+            }
         } else {
             System.out.printf("How many years until you start medical school? [%d] (enter 0 to keep default): ", this.yearsUntilMedSchool);
             int tmpYearsUntilMed = input.nextInt();
             if (tmpYearsUntilMed > 0) this.yearsUntilMedSchool = tmpYearsUntilMed;
+            if (this.yearsUntilMedSchool < 0 || this.yearsUntilMedSchool > 10) {
+                System.out.println("WARNING: Years until med school should be 0-10. Adjusting to valid range.");
+                this.yearsUntilMedSchool = Math.max(0, Math.min(10, this.yearsUntilMedSchool));
+            }
         }
 
         System.out.printf("Enter your expected annual raise percentage [%.1f%%] (e.g., 3 for 3%%, enter 0 to keep default): ", this.annualRaise * 100);
@@ -128,7 +153,10 @@ public class MDCalc {
         if (tmpAnnualRaisePct > 0) {
             double tmpAnnualRaise = tmpAnnualRaisePct / 100.0;
             if (tmpAnnualRaise < 0) tmpAnnualRaise = 0;
-            if (tmpAnnualRaise > 1) tmpAnnualRaise = 1;
+            if (tmpAnnualRaise > 0.20) {
+                System.out.println("WARNING: Annual raise should be 0-20%. Capping at 20%.");
+                tmpAnnualRaise = 0.20;
+            }
             this.annualRaise = tmpAnnualRaise;
         }
 
@@ -138,7 +166,10 @@ public class MDCalc {
         if (tmpInflationPct > 0) {
             double tmpInflationRate = tmpInflationPct / 100.0;
             if (tmpInflationRate < 0) tmpInflationRate = 0;
-            if (tmpInflationRate > 1) tmpInflationRate = 1;
+            if (tmpInflationRate > 0.15) {
+                System.out.println("WARNING: Inflation rate should be 0-15%. Capping at 15%.");
+                tmpInflationRate = 0.15;
+            }
             this.inflationRate = tmpInflationRate;
         }
 
@@ -147,23 +178,37 @@ public class MDCalc {
         if (tmpLoanInterestPct > 0) {
             double tmpLoanInterestRate = tmpLoanInterestPct / 100.0;
             if (tmpLoanInterestRate < 0) tmpLoanInterestRate = 0;
-            if (tmpLoanInterestRate > 1) tmpLoanInterestRate = 1;
+            if (tmpLoanInterestRate > 0.15) {
+                System.out.println("WARNING: Loan interest rate should be 0-15%. Capping at 15%.");
+                tmpLoanInterestRate = 0.15;
+            }
             this.loanInterestRate = tmpLoanInterestRate;
         }
 
         System.out.printf("Enter total medical school loans [$%.0f] (enter 0 to keep default): $", this.totalLoans);
         double tmpTotalLoans = input.nextDouble();
         if (tmpTotalLoans > 0) this.totalLoans = tmpTotalLoans;
-        if (this.totalLoans < 0) this.totalLoans = 0;
+        if (this.totalLoans < 50000 || this.totalLoans > 500000) {
+            System.out.println("WARNING: Medical school loans should be $50K-$500K. Adjusting to valid range.");
+            this.totalLoans = Math.max(50000, Math.min(500000, this.totalLoans));
+        }
 
         System.out.printf("Enter years of residency [%d] (enter 0 to keep default): ", this.residencyYears);
         int tmpResidencyYears = input.nextInt();
         if (tmpResidencyYears > 0) this.residencyYears = tmpResidencyYears;
+        if (this.residencyYears < 3 || this.residencyYears > 7) {
+            System.out.println("WARNING: Residency duration should be 3-7 years. Adjusting to valid range.");
+            this.residencyYears = Math.max(3, Math.min(7, this.residencyYears));
+        }
 
         System.out.printf("Confirm residency salary per year [$%.0f] (enter 0 to keep default): $", this.residencySalary);
         double inputResidencySalary = input.nextDouble();
         if (inputResidencySalary > 0) {
             this.residencySalary = inputResidencySalary;
+        }
+        if (this.residencySalary < 40000 || this.residencySalary > 80000) {
+            System.out.println("WARNING: Residency salary should be $40K-$80K. Adjusting to valid range.");
+            this.residencySalary = Math.max(40000, Math.min(80000, this.residencySalary));
         }
 
         System.out.printf("Will you need a fellowship? [%s] (y/n, 0=keep default): ", this.needsFellowship ? "y" : "n");
@@ -176,25 +221,42 @@ public class MDCalc {
             System.out.printf("Enter fellowship duration in years [%d] (enter 0 to keep default): ", this.fellowshipYears);
             int tmpFellowshipYears = input.nextInt();
             if (tmpFellowshipYears > 0) this.fellowshipYears = tmpFellowshipYears;
+            if (this.fellowshipYears < 1 || this.fellowshipYears > 4) {
+                System.out.println("WARNING: Fellowship duration should be 1-4 years. Adjusting to valid range.");
+                this.fellowshipYears = Math.max(1, Math.min(4, this.fellowshipYears));
+            }
 
             System.out.printf("Confirm fellowship salary per year [$%.0f] (enter 0 to keep default): $", this.fellowshipSalary);
             double inputFellowshipSalary = input.nextDouble();
             if (inputFellowshipSalary > 0) {
                 this.fellowshipSalary = inputFellowshipSalary;
             }
+            if (this.fellowshipSalary < 60000 || this.fellowshipSalary > 120000) {
+                System.out.println("WARNING: Fellowship salary should be $60K-$120K. Adjusting to valid range.");
+                this.fellowshipSalary = Math.max(60000, Math.min(120000, this.fellowshipSalary));
+            }
         }
 
         System.out.printf("Enter expected starting physician salary (after residency/fellowship) [$%.0f] (enter 0 to keep default): $", this.physicianStartingSalary);
         double tmpPhysicianSalary = input.nextDouble();
         if (tmpPhysicianSalary > 0) this.physicianStartingSalary = tmpPhysicianSalary;
-        if (this.physicianStartingSalary < 0) this.physicianStartingSalary = 0;
+        if (this.physicianStartingSalary < 150000 || this.physicianStartingSalary > 800000) {
+            System.out.println("WARNING: Physician starting salary should be $150K-$800K. Adjusting to valid range.");
+            this.physicianStartingSalary = Math.max(150000, Math.min(800000, this.physicianStartingSalary));
+        }
 
         System.out.printf("Confirm retirement contribution rate [%.0f%%] of salary (enter 0 to keep default): ",
                 this.retirementContributionRate * 100);
         double inputRetirementRate = input.nextDouble();
         if (inputRetirementRate > 0) {
-            if (inputRetirementRate < 0) inputRetirementRate = 0;
-            if (inputRetirementRate > 100) inputRetirementRate = 100;
+            if (inputRetirementRate < 5) {
+                System.out.println("WARNING: Retirement contribution should be at least 5%. Setting to 5%.");
+                inputRetirementRate = 5;
+            }
+            if (inputRetirementRate > 50) {
+                System.out.println("WARNING: Retirement contribution should be 5-50%. Capping at 50%.");
+                inputRetirementRate = 50;
+            }
             this.retirementContributionRate = inputRetirementRate / 100.0;
         }
 
@@ -202,8 +264,14 @@ public class MDCalc {
                 this.investmentReturnRate * 100);
         double inputInvestmentReturn = input.nextDouble();
         if (inputInvestmentReturn > 0) {
-            if (inputInvestmentReturn < 0) inputInvestmentReturn = 0;
-            if (inputInvestmentReturn > 100) inputInvestmentReturn = 100;
+            if (inputInvestmentReturn < 3) {
+                System.out.println("WARNING: Investment return should be at least 3%. Setting to 3%.");
+                inputInvestmentReturn = 3;
+            }
+            if (inputInvestmentReturn > 15) {
+                System.out.println("WARNING: Investment return should be 3-15%. Capping at 15%.");
+                inputInvestmentReturn = 15;
+            }
             this.investmentReturnRate = inputInvestmentReturn / 100.0;
         }
 
@@ -212,18 +280,22 @@ public class MDCalc {
         int inputRetirementAge = input.nextInt();
         if (inputRetirementAge > 0) {
             if (inputRetirementAge <= this.currentAge) {
+                System.out.println("WARNING: Retirement age must be after current age. Setting to current age + 1.");
                 inputRetirementAge = this.currentAge + 1;
             }
-            if (inputRetirementAge > 100) {
-                inputRetirementAge = 100;
+            if (inputRetirementAge > 80) {
+                System.out.println("WARNING: Retirement age should be 80 or less. Capping at 80.");
+                inputRetirementAge = 80;
             }
             this.retirementAge = inputRetirementAge;
         }
 
         System.out.printf("Enter loan repayment period in years [%d] (enter 0 to keep default): ", this.loanRepaymentYears);
         int inputRepaymentYears = input.nextInt();
-        if (inputRepaymentYears > 0) {
-            this.loanRepaymentYears = inputRepaymentYears;
+        if (inputRepaymentYears > 0) this.loanRepaymentYears = inputRepaymentYears;
+        if (this.loanRepaymentYears < 5 || this.loanRepaymentYears > 30) {
+            System.out.println("WARNING: Loan repayment period should be 5-30 years. Adjusting to valid range.");
+            this.loanRepaymentYears = Math.max(5, Math.min(30, this.loanRepaymentYears));
         }
 
         System.out.printf("Enter monthly loan payment amount [$%.0f] (enter 0 to auto-calculate): $", this.monthlyLoanPayment);
@@ -263,7 +335,9 @@ public class MDCalc {
             for (int year = 1; year <= postBaccYears; year++) {
                 currentYear++;
                 double yearlyOpportunityCost = currentYearSalary;
-                double missedRetirementContribution = currentYearSalary * retirementContributionRate;
+                // Fix: Use more realistic retirement contribution assumption during training
+                // Assume they would contribute a fixed percentage of their pre-training salary
+                double missedRetirementContribution = currentYearSalary * retirementContributionRate * 0.5; // Reduced during training
 
                 // Calculate lost retirement growth to selected retirement age
                 int yearsToGrow = yearsUntilRetirement - currentYear + 1;
@@ -274,19 +348,23 @@ public class MDCalc {
                 }
 
                 totalOpportunityCost += yearlyOpportunityCost;
-                currentYearSalary *= (1 + annualRaise);
+                // Fix: Apply inflation-adjusted salary growth consistently
+                currentYearSalary *= (1 + Math.max(annualRaise, inflationRate));
             }
 
-            // Post-bacc loan interest (starts accruing immediately) - daily compounding
-            int yearsForPostBaccInterest = postBaccYears + yearsUntilMedSchool + medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0);
+            // Fix: More realistic post-bacc loan interest calculation
+            // Assume 6-month grace period after post-bacc before interest starts
+            double yearsForPostBaccInterest = Math.max(0, yearsUntilMedSchool - 0.5) + medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0);
             double dailyRate = loanInterestRate / 365.0;
-            int daysForPostBaccInterest = yearsForPostBaccInterest * 365;
-            postBaccLoanInterest = postBaccCost * Math.pow(1 + dailyRate, daysForPostBaccInterest) - postBaccCost;
+            int daysForPostBaccInterest = (int)(yearsForPostBaccInterest * 365);
+            if (daysForPostBaccInterest > 0) {
+                postBaccLoanInterest = postBaccCost * Math.pow(1 + dailyRate, daysForPostBaccInterest) - postBaccCost;
+            }
 
             // Years between post-bacc and med school (working again)
             for (int year = 1; year <= yearsUntilMedSchool; year++) {
                 currentYear++;
-                currentYearSalary *= (1 + annualRaise);
+                currentYearSalary *= (1 + Math.max(annualRaise, inflationRate));
             }
         }
 
@@ -294,7 +372,8 @@ public class MDCalc {
         for (int year = 1; year <= medSchoolYears; year++) {
             currentYear++;
             double yearlyOpportunityCost = currentYearSalary;
-            double missedRetirementContribution = currentYearSalary * retirementContributionRate;
+            // Fix: Use more realistic retirement contribution assumption during training
+            double missedRetirementContribution = currentYearSalary * retirementContributionRate * 0.5; // Reduced during training
 
             int yearsToGrow = yearsUntilRetirement - currentYear + 1;
             if (yearsToGrow > 0) {
@@ -304,15 +383,18 @@ public class MDCalc {
             }
 
             totalOpportunityCost += yearlyOpportunityCost;
-            currentYearSalary *= (1 + annualRaise);
+            // Fix: Apply inflation-adjusted salary growth consistently
+            currentYearSalary *= (1 + Math.max(annualRaise, inflationRate));
         }
 
         // Phase 4: Residency years
         for (int year = 1; year <= residencyYears; year++) {
             currentYear++;
             double yearlyOpportunityCost = currentYearSalary - residencySalary;
-            double missedRetirementContribution = currentYearSalary * retirementContributionRate;
+            // Fix: More realistic retirement contribution during residency
+            // Assume they contribute based on actual income, not missed opportunity
             double actualRetirementContribution = residencySalary * retirementContributionRate;
+            double missedRetirementContribution = currentYearSalary * retirementContributionRate * 0.3; // Reduced opportunity cost
             double netMissedContribution = missedRetirementContribution - actualRetirementContribution;
 
             int yearsToGrow = yearsUntilRetirement - currentYear + 1;
@@ -323,7 +405,8 @@ public class MDCalc {
             }
 
             totalOpportunityCost += yearlyOpportunityCost;
-            currentYearSalary *= (1 + annualRaise);
+            // Fix: Apply inflation-adjusted salary growth consistently
+            currentYearSalary *= (1 + Math.max(annualRaise, inflationRate));
         }
 
         // Phase 5: Fellowship years (if needed)
@@ -331,8 +414,9 @@ public class MDCalc {
             for (int year = 1; year <= fellowshipYears; year++) {
                 currentYear++;
                 double yearlyOpportunityCost = currentYearSalary - fellowshipSalary;
-                double missedRetirementContribution = currentYearSalary * retirementContributionRate;
+                // Fix: More realistic retirement contribution during fellowship
                 double actualRetirementContribution = fellowshipSalary * retirementContributionRate;
+                double missedRetirementContribution = currentYearSalary * retirementContributionRate * 0.3; // Reduced opportunity cost
                 double netMissedContribution = missedRetirementContribution - actualRetirementContribution;
 
                 int yearsToGrow = yearsUntilRetirement - currentYear + 1;
@@ -343,15 +427,19 @@ public class MDCalc {
                 }
 
                 totalOpportunityCost += yearlyOpportunityCost;
-                currentYearSalary *= (1 + annualRaise);
+                // Fix: Apply inflation-adjusted salary growth consistently
+                currentYearSalary *= (1 + Math.max(annualRaise, inflationRate));
             }
         }
 
-        // Calculate medical school loan interest (accrues during med school, residency, and fellowship) - daily compounding
-        int yearsForMedSchoolInterest = medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0);
+        // Fix: More realistic medical school loan interest calculation
+        // Assume 6-month grace period after graduation before interest starts
+        double yearsForMedSchoolInterest = Math.max(0, residencyYears - 0.5) + (needsFellowship ? fellowshipYears : 0);
         double dailyLoanRate = loanInterestRate / 365.0;
-        int daysForMedSchoolInterest = yearsForMedSchoolInterest * 365;
-        cumulativeLoanInterest = totalLoans * Math.pow(1 + dailyLoanRate, daysForMedSchoolInterest) - totalLoans;
+        int daysForMedSchoolInterest = (int)(yearsForMedSchoolInterest * 365);
+        if (daysForMedSchoolInterest > 0) {
+            cumulativeLoanInterest = totalLoans * Math.pow(1 + dailyLoanRate, daysForMedSchoolInterest) - totalLoans;
+        }
 
         double totalLoanAmount = totalLoans + (needsPostBacc ? postBaccCost : 0);
         double totalLoanInterest = cumulativeLoanInterest + postBaccLoanInterest;

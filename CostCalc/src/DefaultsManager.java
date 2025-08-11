@@ -41,7 +41,9 @@ public class DefaultsManager {
         String v = getProps().getProperty(key);
         if (v == null) return def;
         try {
-            return Integer.parseInt(v.trim());
+            int value = Integer.parseInt(v.trim());
+            // Validate bounds for critical values
+            return validateInt(key, value, def);
         } catch (NumberFormatException e) {
             return def;
         }
@@ -51,7 +53,9 @@ public class DefaultsManager {
         String v = getProps().getProperty(key);
         if (v == null) return def;
         try {
-            return Double.parseDouble(v.trim());
+            double value = Double.parseDouble(v.trim());
+            // Validate bounds for critical values
+            return validateDouble(key, value, def);
         } catch (NumberFormatException e) {
             return def;
         }
@@ -99,5 +103,59 @@ public class DefaultsManager {
         public static final String RETIREMENT_AGE = "retirementAge";
         public static final String ANNUAL_RAISE = "annualRaise"; // fraction
         public static final String LOAN_INTEREST_RATE = "loanInterestRate"; // fraction
+    }
+
+    // Validation methods to ensure saved values are within realistic bounds
+    private static int validateInt(String key, int value, int def) {
+        switch (key) {
+            case Keys.CURRENT_AGE:
+                return (value >= 18 && value <= 70) ? value : def;
+            case Keys.MED_SCHOOL_YEARS:
+                return (value >= 3 && value <= 5) ? value : def;
+            case Keys.RESIDENCY_YEARS:
+                return (value >= 3 && value <= 7) ? value : def;
+            case Keys.FELLOWSHIP_YEARS:
+                return (value >= 1 && value <= 4) ? value : def;
+            case Keys.POST_BACC_YEARS:
+                return (value >= 1 && value <= 4) ? value : def;
+            case Keys.YEARS_UNTIL_POST_BACC:
+            case Keys.YEARS_UNTIL_MED_SCHOOL:
+                return (value >= 0 && value <= 10) ? value : def;
+            case Keys.LOAN_REPAYMENT_YEARS:
+                return (value >= 5 && value <= 30) ? value : def;
+            case Keys.RETIREMENT_AGE:
+                return (value >= 50 && value <= 80) ? value : def;
+            default:
+                return value;
+        }
+    }
+
+    private static double validateDouble(String key, double value, double def) {
+        switch (key) {
+            case Keys.CURRENT_SALARY:
+                return (value >= 20000 && value <= 1000000) ? value : def;
+            case Keys.RESIDENCY_SALARY:
+                return (value >= 40000 && value <= 80000) ? value : def;
+            case Keys.FELLOWSHIP_SALARY:
+                return (value >= 60000 && value <= 120000) ? value : def;
+            case Keys.PHYSICIAN_STARTING_SALARY:
+                return (value >= 150000 && value <= 800000) ? value : def;
+            case Keys.POST_BACC_COST:
+                return (value >= 10000 && value <= 200000) ? value : def;
+            case Keys.RETIREMENT_CONTRIB_RATE:
+                return (value >= 0.05 && value <= 0.50) ? value : def;
+            case Keys.INVESTMENT_RETURN_RATE:
+                return (value >= 0.03 && value <= 0.15) ? value : def;
+            case Keys.INFLATION_RATE:
+                return (value >= 0.0 && value <= 0.15) ? value : def;
+            case Keys.ANNUAL_RAISE:
+                return (value >= 0.0 && value <= 0.20) ? value : def;
+            case Keys.LOAN_INTEREST_RATE:
+                return (value >= 0.0 && value <= 0.15) ? value : def;
+            case Keys.MONTHLY_LOAN_PAYMENT:
+                return (value >= 0.0) ? value : def;
+            default:
+                return value;
+        }
     }
 }
