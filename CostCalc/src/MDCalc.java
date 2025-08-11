@@ -142,14 +142,18 @@ public class MDCalc {
             this.inflationRate = tmpInflationRate;
         }
 
-        System.out.printf("Enter average interest rate on medical school loans [%.1f%%] (e.g., 6 for 6%%): ", this.loanInterestRate * 100);
-        double tmpLoanInterestRate = input.nextDouble() / 100.0;
-        if (tmpLoanInterestRate >= 0 && tmpLoanInterestRate <= 1) this.loanInterestRate = tmpLoanInterestRate;
-        if (this.loanInterestRate < 0) this.loanInterestRate = 0;
-        if (this.loanInterestRate > 1) this.loanInterestRate = 1;
+        System.out.printf("Enter average interest rate on medical school loans [%.1f%%] (e.g., 6 for 6%%, enter 0 to keep default): ", this.loanInterestRate * 100);
+        double tmpLoanInterestPct = input.nextDouble();
+        if (tmpLoanInterestPct > 0) {
+            double tmpLoanInterestRate = tmpLoanInterestPct / 100.0;
+            if (tmpLoanInterestRate < 0) tmpLoanInterestRate = 0;
+            if (tmpLoanInterestRate > 1) tmpLoanInterestRate = 1;
+            this.loanInterestRate = tmpLoanInterestRate;
+        }
 
-        System.out.print("Enter total medical school loans: $");
-        this.totalLoans = input.nextDouble();
+        System.out.printf("Enter total medical school loans [$%.0f] (enter 0 to keep default): $", this.totalLoans);
+        double tmpTotalLoans = input.nextDouble();
+        if (tmpTotalLoans > 0) this.totalLoans = tmpTotalLoans;
         if (this.totalLoans < 0) this.totalLoans = 0;
 
         System.out.printf("Enter years of residency [%d] (enter 0 to keep default): ", this.residencyYears);
@@ -162,9 +166,11 @@ public class MDCalc {
             this.residencySalary = inputResidencySalary;
         }
 
-        System.out.printf("Will you need a fellowship? [%s] (y/n): ", this.needsFellowship ? "y" : "n");
+        System.out.printf("Will you need a fellowship? [%s] (y/n, 0=keep default): ", this.needsFellowship ? "y" : "n");
         String fellowshipResponse = input.next().toLowerCase();
-        this.needsFellowship = fellowshipResponse.startsWith("y");
+        if (!fellowshipResponse.equals("0")) {
+            this.needsFellowship = fellowshipResponse.startsWith("y");
+        }
 
         if (this.needsFellowship) {
             System.out.printf("Enter fellowship duration in years [%d] (enter 0 to keep default): ", this.fellowshipYears);
@@ -178,7 +184,7 @@ public class MDCalc {
             }
         }
 
-        System.out.printf("Enter expected starting physician salary (after residency/fellowship) [$%.0f]: $", this.physicianStartingSalary);
+        System.out.printf("Enter expected starting physician salary (after residency/fellowship) [$%.0f] (enter 0 to keep default): $", this.physicianStartingSalary);
         double tmpPhysicianSalary = input.nextDouble();
         if (tmpPhysicianSalary > 0) this.physicianStartingSalary = tmpPhysicianSalary;
         if (this.physicianStartingSalary < 0) this.physicianStartingSalary = 0;
@@ -226,9 +232,11 @@ public class MDCalc {
         if (this.monthlyLoanPayment < 0) this.monthlyLoanPayment = 0;
 
         // New: ask whether to auto-align payoff to retirement age
-        System.out.print("Auto-align loan payoff to your retirement age by adjusting term/payment? (y/n): ");
+        System.out.printf("Auto-align loan payoff to your retirement age by adjusting term/payment? [%s] (y/n, 0=keep default): ", this.alignRepaymentToRetirement ? "y" : "n");
         String alignResp = input.next().toLowerCase();
-        this.alignRepaymentToRetirement = alignResp.startsWith("y");
+        if (!alignResp.equals("0")) {
+            this.alignRepaymentToRetirement = alignResp.startsWith("y");
+        }
     }
 
     public OpportunityCostResult calculateOpportunityCost() {
