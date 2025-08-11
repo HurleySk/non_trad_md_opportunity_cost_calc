@@ -190,6 +190,7 @@ public class Main {
         double postBaccCost = DefaultsManager.getDouble(DefaultsManager.Keys.POST_BACC_COST, 60000);
         int yearsUntilPostBacc = DefaultsManager.getInt(DefaultsManager.Keys.YEARS_UNTIL_POST_BACC, 1);
         int yearsUntilMedSchool = DefaultsManager.getInt(DefaultsManager.Keys.YEARS_UNTIL_MED_SCHOOL, 1);
+        double totalLoans = DefaultsManager.getDouble(DefaultsManager.Keys.TOTAL_LOANS, 300000);
         int loanRepaymentYears = DefaultsManager.getInt(DefaultsManager.Keys.LOAN_REPAYMENT_YEARS, 10);
         double monthlyLoanPayment = DefaultsManager.getDouble(DefaultsManager.Keys.MONTHLY_LOAN_PAYMENT, 0);
         int retirementAge = DefaultsManager.getInt(DefaultsManager.Keys.RETIREMENT_AGE, 65);
@@ -214,6 +215,7 @@ public class Main {
         postBaccCost = askDouble.apply("Post-bacc total cost ($)", postBaccCost);
         yearsUntilPostBacc = askInt.apply("Years until post-bacc", yearsUntilPostBacc);
         yearsUntilMedSchool = askInt.apply("Years until med school", yearsUntilMedSchool);
+        totalLoans = askDouble.apply("Total medical school loans ($)", totalLoans);
         loanRepaymentYears = askInt.apply("Loan repayment years", loanRepaymentYears);
         monthlyLoanPayment = askDouble.apply("Monthly loan payment ($, 0=auto)", monthlyLoanPayment);
         retirementAge = askInt.apply("Retirement age", retirementAge);
@@ -224,7 +226,7 @@ public class Main {
         saveAllDefaults(currentAge, currentSalary, medSchoolYears, residencyYears, residencySalary,
                 physicianStartingSalary, retirementContributionRate, investmentReturnRate, inflationRate,
                 needsFellowship, fellowshipYears, fellowshipSalary, needsPostBacc, postBaccYears, postBaccCost,
-                yearsUntilPostBacc, yearsUntilMedSchool, loanRepaymentYears, monthlyLoanPayment,
+                yearsUntilPostBacc, yearsUntilMedSchool, totalLoans, loanRepaymentYears, monthlyLoanPayment,
                 retirementAge, annualRaise, loanInterestRate);
     }
 
@@ -296,6 +298,7 @@ public class Main {
         print("  Retirement age: " + DefaultsManager.getInt(DefaultsManager.Keys.RETIREMENT_AGE, 65) + " years");
         
         print("\nLoan Settings:");
+        print("  Total medical school loans: $" + String.format("%,.0f", DefaultsManager.getDouble(DefaultsManager.Keys.TOTAL_LOANS, 300000)));
         print("  Loan interest rate: " + String.format("%.1f", DefaultsManager.getDouble(DefaultsManager.Keys.LOAN_INTEREST_RATE, 0.06) * 100) + "%");
         print("  Loan repayment years: " + DefaultsManager.getInt(DefaultsManager.Keys.LOAN_REPAYMENT_YEARS, 10));
         
@@ -307,7 +310,7 @@ public class Main {
             double residencySalary, double physicianStartingSalary, double retirementContributionRate, 
             double investmentReturnRate, double inflationRate, boolean needsFellowship, int fellowshipYears, 
             double fellowshipSalary, boolean needsPostBacc, int postBaccYears, double postBaccCost, 
-            int yearsUntilPostBacc, int yearsUntilMedSchool, int loanRepaymentYears, double monthlyLoanPayment, 
+            int yearsUntilPostBacc, int yearsUntilMedSchool, double totalLoans, int loanRepaymentYears, double monthlyLoanPayment, 
             int retirementAge, double annualRaise, double loanInterestRate) {
         
         // Save all values
@@ -328,6 +331,7 @@ public class Main {
         DefaultsManager.setDouble(DefaultsManager.Keys.POST_BACC_COST, postBaccCost);
         DefaultsManager.setInt(DefaultsManager.Keys.YEARS_UNTIL_POST_BACC, yearsUntilPostBacc);
         DefaultsManager.setInt(DefaultsManager.Keys.YEARS_UNTIL_MED_SCHOOL, yearsUntilMedSchool);
+        DefaultsManager.setDouble(DefaultsManager.Keys.TOTAL_LOANS, totalLoans);
         DefaultsManager.setInt(DefaultsManager.Keys.LOAN_REPAYMENT_YEARS, loanRepaymentYears);
         DefaultsManager.setDouble(DefaultsManager.Keys.MONTHLY_LOAN_PAYMENT, monthlyLoanPayment);
         DefaultsManager.setInt(DefaultsManager.Keys.RETIREMENT_AGE, retirementAge);
@@ -535,12 +539,19 @@ public class Main {
         print("\n=== MODIFY LOAN DEFAULTS ===");
         print("Press Enter to keep the current value shown in [brackets].");
         
+        double totalLoans = DefaultsManager.getDouble(DefaultsManager.Keys.TOTAL_LOANS, 300000);
         double loanInterestRate = DefaultsManager.getDouble(DefaultsManager.Keys.LOAN_INTEREST_RATE, 0.06);
         int loanRepaymentYears = DefaultsManager.getInt(DefaultsManager.Keys.LOAN_REPAYMENT_YEARS, 10);
         double monthlyLoanPayment = DefaultsManager.getDouble(DefaultsManager.Keys.MONTHLY_LOAN_PAYMENT, 0);
         
-        System.out.printf("Loan interest rate [%.1f%%]: ", loanInterestRate * 100);
+        System.out.printf("Total medical school loans [$%.0f]: $", totalLoans);
         String input = globalInput.nextLine().trim();
+        if (!input.isEmpty()) {
+            try { totalLoans = Double.parseDouble(input); } catch (NumberFormatException e) { print("Invalid, keeping current."); }
+        }
+        
+        System.out.printf("Loan interest rate [%.1f%%]: ", loanInterestRate * 100);
+        input = globalInput.nextLine().trim();
         if (!input.isEmpty()) {
             try { loanInterestRate = Double.parseDouble(input) / 100.0; } catch (NumberFormatException e) { print("Invalid, keeping current."); }
         }
@@ -558,6 +569,7 @@ public class Main {
         }
         
         // Save loan defaults
+        DefaultsManager.setDouble(DefaultsManager.Keys.TOTAL_LOANS, totalLoans);
         DefaultsManager.setDouble(DefaultsManager.Keys.LOAN_INTEREST_RATE, loanInterestRate);
         DefaultsManager.setInt(DefaultsManager.Keys.LOAN_REPAYMENT_YEARS, loanRepaymentYears);
         DefaultsManager.setDouble(DefaultsManager.Keys.MONTHLY_LOAN_PAYMENT, monthlyLoanPayment);

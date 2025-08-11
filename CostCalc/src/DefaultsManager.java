@@ -98,6 +98,7 @@ public class DefaultsManager {
         public static final String POST_BACC_COST = "postBaccCost";
         public static final String YEARS_UNTIL_POST_BACC = "yearsUntilPostBacc";
         public static final String YEARS_UNTIL_MED_SCHOOL = "yearsUntilMedSchool";
+        public static final String TOTAL_LOANS = "totalLoans";
         public static final String LOAN_REPAYMENT_YEARS = "loanRepaymentYears";
         public static final String MONTHLY_LOAN_PAYMENT = "monthlyLoanPayment";
         public static final String RETIREMENT_AGE = "retirementAge";
@@ -142,6 +143,8 @@ public class DefaultsManager {
                 return (value >= 150000 && value <= 800000) ? value : def;
             case Keys.POST_BACC_COST:
                 return (value >= 10000 && value <= 200000) ? value : def;
+            case Keys.TOTAL_LOANS:
+                return (value >= 50000 && value <= 500000) ? value : def;
             case Keys.RETIREMENT_CONTRIB_RATE:
                 return (value >= 0.05 && value <= 0.50) ? value : def;
             case Keys.INVESTMENT_RETURN_RATE:
