@@ -470,7 +470,7 @@ public class MDCalc {
         int breakEvenAge = calculateBreakEvenAge(totalCost, currentYearSalary);
 
         return new OpportunityCostResult(totalCost, breakEvenAge, totalOpportunityCost,
-                cumulativeLostRetirement, totalLoanInterest, totalLoanAmount);
+                cumulativeLostRetirement, totalLoanInterest, totalLoans);
     }
 
     private double calculateMonthlyPayment(double loanBalance, double annualRate, int years) {
@@ -647,6 +647,317 @@ public class MDCalc {
         // Show what percentage of the total cost is retirement losses
         double retirementPercentage = (result.getLostRetirementGrowth() / result.getTotalCost()) * 100;
         System.out.printf("Retirement losses represent %.1f%% of total opportunity cost%n", retirementPercentage);
+    }
+
+    /**
+     * Displays optimization suggestions menu after calculation results
+     */
+    public void displayOptimizationMenu(OpportunityCostResult result, Scanner input) {
+        System.out.println("\n=== OPTIMIZATION SUGGESTIONS ===");
+        System.out.println("Would you like to see suggestions for reaching break-even earlier?");
+        System.out.println("1. Loan repayment optimization strategies");
+        System.out.println("2. Target salary recommendations");
+        System.out.println("3. Skip optimization suggestions");
+        System.out.print("Enter choice (1-3): ");
+        
+        if (!input.hasNextInt()) {
+            System.out.println("Invalid input. Skipping optimization suggestions.");
+            input.nextLine(); // consume invalid input
+            return;
+        }
+        
+        int choice = input.nextInt();
+        input.nextLine(); // consume newline
+        
+        switch (choice) {
+            case 1:
+                displayLoanOptimizationSuggestions(result, input);
+                break;
+            case 2:
+                displayTargetSalaryRecommendations(result, input);
+                break;
+            case 3:
+                System.out.println("Skipping optimization suggestions.");
+                break;
+            default:
+                System.out.println("Invalid choice. Skipping optimization suggestions.");
+                break;
+        }
+    }
+
+    /**
+     * Displays loan repayment optimization suggestions
+     */
+    private void displayLoanOptimizationSuggestions(OpportunityCostResult result, Scanner input) {
+        System.out.println("\n=== LOAN REPAYMENT OPTIMIZATION ===");
+        
+        double totalLoanBalance = result.getTotalLoans() + result.getLoanInterest();
+        int totalTimeToBecomeMD = (needsPostBacc ? yearsUntilPostBacc + postBaccYears + yearsUntilMedSchool : yearsUntilMedSchool) +
+                medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0);
+        int ageWhenStarting = currentAge + totalTimeToBecomeMD;
+        
+        // Check if aggressive repayment can help reach break-even earlier
+        boolean canOptimizeLoans = result.getBreakEvenAge() > ageWhenStarting;
+        
+        if (!canOptimizeLoans) {
+            System.out.println("Your current loan repayment strategy is already optimal!");
+            System.out.println("Break-even age (" + result.getBreakEvenAge() + ") is at or before you start practicing.");
+            return;
+        }
+        
+        System.out.println("Current situation:");
+        System.out.printf("- Break-even age: %d years old%n", result.getBreakEvenAge());
+        System.out.printf("- Age when starting practice: %d years old%n", ageWhenStarting);
+        System.out.printf("- Years to break-even after starting: %d years%n", result.getBreakEvenAge() - ageWhenStarting);
+        System.out.printf("- Current monthly payment: $%,.2f (%d-year term)%n", monthlyLoanPayment, loanRepaymentYears);
+        
+        System.out.println("\n=== AGGRESSIVE REPAYMENT SCENARIOS ===");
+        
+        // Scenario 1: 5-year aggressive repayment
+        int aggressiveYears = 5;
+        double aggressiveMonthlyPayment = calculateMonthlyPayment(totalLoanBalance, loanInterestRate, aggressiveYears);
+        int aggressiveBreakEvenAge = calculateBreakEvenAgeWithCustomPayment(result.getTotalCost(), aggressiveMonthlyPayment, aggressiveYears);
+        
+        if (aggressiveBreakEvenAge < result.getBreakEvenAge()) {
+            System.out.printf("5-year aggressive repayment:%n");
+            System.out.printf("- Monthly payment: $%,.2f%n", aggressiveMonthlyPayment);
+            System.out.printf("- Annual burden: $%,.2f%n", aggressiveMonthlyPayment * 12);
+            System.out.printf("- New break-even age: %d years old%n", aggressiveBreakEvenAge);
+            System.out.printf("- Years saved: %d%n", result.getBreakEvenAge() - aggressiveBreakEvenAge);
+            
+            double percentOfIncome = (aggressiveMonthlyPayment * 12 / physicianStartingSalary) * 100;
+            if (percentOfIncome > 50) {
+                System.out.printf("⚠️  WARNING: This represents %.1f%% of first-year physician income%n", percentOfIncome);
+                System.out.println("   Consider if this payment level is sustainable.");
+            }
+        } else {
+            System.out.println("5-year repayment would not improve break-even age.");
+        }
+        
+        // Scenario 2: 7-year moderate repayment
+        int moderateYears = 7;
+        double moderateMonthlyPayment = calculateMonthlyPayment(totalLoanBalance, loanInterestRate, moderateYears);
+        int moderateBreakEvenAge = calculateBreakEvenAgeWithCustomPayment(result.getTotalCost(), moderateMonthlyPayment, moderateYears);
+        
+        if (moderateBreakEvenAge < result.getBreakEvenAge()) {
+            System.out.printf("\n7-year moderate repayment:%n");
+            System.out.printf("- Monthly payment: $%,.2f%n", moderateMonthlyPayment);
+            System.out.printf("- Annual burden: $%,.2f%n", moderateMonthlyPayment * 12);
+            System.out.printf("- New break-even age: %d years old%n", moderateBreakEvenAge);
+            System.out.printf("- Years saved: %d%n", result.getBreakEvenAge() - moderateBreakEvenAge);
+            
+            double percentOfIncome = (moderateMonthlyPayment * 12 / physicianStartingSalary) * 100;
+            if (percentOfIncome > 50) {
+                System.out.printf("⚠️  WARNING: This represents %.1f%% of first-year physician income%n", percentOfIncome);
+            }
+        }
+        
+        // Scenario 3: Custom repayment term
+        System.out.println("\n=== CUSTOM REPAYMENT ANALYSIS ===");
+        System.out.println("Enter a target break-even age (or 0 to skip): ");
+        
+        if (input.hasNextInt()) {
+            int targetBreakEvenAge = input.nextInt();
+            input.nextLine(); // consume newline
+            
+            if (targetBreakEvenAge > 0 && targetBreakEvenAge < result.getBreakEvenAge()) {
+                int yearsToTarget = targetBreakEvenAge - ageWhenStarting;
+                if (yearsToTarget > 0) {
+                    double customMonthlyPayment = calculateMonthlyPayment(totalLoanBalance, loanInterestRate, yearsToTarget);
+                    System.out.printf("\nTo reach break-even at age %d:%n", targetBreakEvenAge);
+                    System.out.printf("- Required repayment term: %d years%n", yearsToTarget);
+                    System.out.printf("- Monthly payment: $%,.2f%n", customMonthlyPayment);
+                    System.out.printf("- Annual burden: $%,.2f%n", customMonthlyPayment * 12);
+                    
+                    double percentOfIncome = (customMonthlyPayment * 12 / physicianStartingSalary) * 100;
+                    if (percentOfIncome > 50) {
+                        System.out.printf("⚠️  WARNING: This represents %.1f%% of first-year physician income%n", percentOfIncome);
+                        System.out.println("   This payment level may not be sustainable.");
+                    }
+                } else {
+                    System.out.println("Target break-even age is too early - already past when you start practicing.");
+                }
+            } else if (targetBreakEvenAge > 0) {
+                System.out.println("Target break-even age is not earlier than current projection.");
+            }
+        } else {
+            System.out.println("Invalid input. Skipping custom analysis.");
+            input.nextLine(); // consume invalid input
+        }
+        
+        System.out.println("\n=== RECOMMENDATIONS ===");
+        if (aggressiveBreakEvenAge < result.getBreakEvenAge() || moderateBreakEvenAge < result.getBreakEvenAge()) {
+            System.out.println("✅ Consider accelerating loan repayment to reach break-even sooner.");
+            System.out.println("✅ Higher monthly payments reduce total interest and accelerate wealth building.");
+            System.out.println("⚠️  Ensure payment levels are sustainable with your lifestyle and other expenses.");
+        } else {
+            System.out.println("✅ Your current loan strategy is well-optimized for your situation.");
+            System.out.println("✅ Focus on other optimization strategies like increasing income or reducing costs.");
+        }
+    }
+
+    /**
+     * Displays target salary recommendations
+     */
+    private void displayTargetSalaryRecommendations(OpportunityCostResult result, Scanner input) {
+        System.out.println("\n=== TARGET SALARY RECOMMENDATIONS ===");
+        
+        int totalTimeToBecomeMD = (needsPostBacc ? yearsUntilPostBacc + postBaccYears + yearsUntilMedSchool : yearsUntilMedSchool) +
+                medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0);
+        int ageWhenStarting = currentAge + totalTimeToBecomeMD;
+        
+        System.out.println("Current situation:");
+        System.out.printf("- Starting physician salary: $%,.2f%n", physicianStartingSalary);
+        System.out.printf("- Break-even age: %d years old%n", result.getBreakEvenAge());
+        System.out.printf("- Years to break-even after starting: %d years%n", result.getBreakEvenAge() - ageWhenStarting);
+        
+        if (result.getBreakEvenAge() <= ageWhenStarting) {
+            System.out.println("\n✅ Congratulations! You're already projected to break even immediately or before starting practice.");
+            System.out.println("Your current salary projections are excellent for your situation.");
+            return;
+        }
+        
+        System.out.println("\n=== SALARY OPTIMIZATION SCENARIOS ===");
+        
+        // Calculate what salary would be needed to break even in 5 years
+        double targetSalary5Years = calculateTargetSalaryForBreakEven(result.getTotalCost(), 5, ageWhenStarting);
+        if (targetSalary5Years > physicianStartingSalary) {
+            System.out.printf("To break even in 5 years after starting practice:%n");
+            System.out.printf("- Target starting salary: $%,.2f%n", targetSalary5Years);
+            System.out.printf("- Salary increase needed: $%,.2f%n", targetSalary5Years - physicianStartingSalary);
+            System.out.printf("- Percentage increase: %.1f%%%n", ((targetSalary5Years / physicianStartingSalary) - 1) * 100);
+        }
+        
+        // Calculate what salary would be needed to break even in 10 years
+        double targetSalary10Years = calculateTargetSalaryForBreakEven(result.getTotalCost(), 10, ageWhenStarting);
+        if (targetSalary10Years > physicianStartingSalary) {
+            System.out.printf("\nTo break even in 10 years after starting practice:%n");
+            System.out.printf("- Target starting salary: $%,.2f%n", targetSalary10Years);
+            System.out.printf("- Salary increase needed: $%,.2f%n", targetSalary10Years - physicianStartingSalary);
+            System.out.printf("- Percentage increase: %.1f%%%n", ((targetSalary10Years / physicianStartingSalary) - 1) * 100);
+        }
+        
+        // Calculate what salary would be needed to break even at retirement age
+        int yearsToRetirement = retirementAge - ageWhenStarting;
+        if (yearsToRetirement > 0) {
+            double targetSalaryRetirement = calculateTargetSalaryForBreakEven(result.getTotalCost(), yearsToRetirement, ageWhenStarting);
+            if (targetSalaryRetirement > physicianStartingSalary) {
+                System.out.printf("\nTo break even by retirement age (%d):%n", retirementAge);
+                System.out.printf("- Target starting salary: $%,.2f%n", targetSalaryRetirement);
+                System.out.printf("- Salary increase needed: $%,.2f%n", targetSalaryRetirement - physicianStartingSalary);
+                System.out.printf("- Percentage increase: %.1f%%%n", ((targetSalaryRetirement / physicianStartingSalary) - 1) * 100);
+            }
+        }
+        
+        // Custom target analysis
+        System.out.println("\n=== CUSTOM TARGET ANALYSIS ===");
+        System.out.println("Enter target years to break-even after starting practice (or 0 to skip): ");
+        
+        if (input.hasNextInt()) {
+            int targetYears = input.nextInt();
+            input.nextLine(); // consume newline
+            
+            if (targetYears > 0 && targetYears < (result.getBreakEvenAge() - ageWhenStarting)) {
+                double customTargetSalary = calculateTargetSalaryForBreakEven(result.getTotalCost(), targetYears, ageWhenStarting);
+                System.out.printf("\nTo break even in %d years after starting practice:%n", targetYears);
+                System.out.printf("- Target starting salary: $%,.2f%n", customTargetSalary);
+                System.out.printf("- Salary increase needed: $%,.2f%n", customTargetSalary - physicianStartingSalary);
+                System.out.printf("- Percentage increase: %.1f%%%n", ((customTargetSalary / physicianStartingSalary) - 1) * 100);
+                
+                if (customTargetSalary > 800000) {
+                    System.out.println("⚠️  WARNING: This salary level may be unrealistic for most specialties.");
+                    System.out.println("   Consider combining salary increases with other optimization strategies.");
+                }
+            } else if (targetYears > 0) {
+                System.out.println("Target years is not shorter than current projection.");
+            }
+        } else {
+            System.out.println("Invalid input. Skipping custom analysis.");
+            input.nextLine(); // consume invalid input
+        }
+        
+        System.out.println("\n=== RECOMMENDATIONS ===");
+        System.out.println("✅ Research salaries in your target specialty and geographic region.");
+        System.out.println("✅ Consider subspecialty training that commands higher compensation.");
+        System.out.println("✅ Negotiate aggressively for your first attending position.");
+        System.out.println("✅ Explore opportunities in underserved areas that may offer higher pay.");
+        System.out.println("✅ Consider combining salary increases with accelerated loan repayment.");
+    }
+
+    /**
+     * Calculates break-even age with a custom monthly loan payment
+     */
+    private int calculateBreakEvenAgeWithCustomPayment(double totalCost, double customMonthlyPayment, int customRepaymentYears) {
+        double physicianSalary = physicianStartingSalary;
+        double nonMDSalary = currentSalary * Math.pow(1 + annualRaise, 
+            (needsPostBacc ? yearsUntilPostBacc + postBaccYears + yearsUntilMedSchool : yearsUntilMedSchool) +
+            medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0));
+        
+        double cumulativeDifference = -totalCost;
+        int yearsAfterTraining = 0;
+        double annualLoanPayment = customMonthlyPayment * 12;
+
+        while (cumulativeDifference < 0 && yearsAfterTraining < 50) {
+            yearsAfterTraining++;
+
+            double physicianNetIncome = physicianSalary;
+            if (yearsAfterTraining <= customRepaymentYears) {
+                physicianNetIncome -= annualLoanPayment;
+            }
+
+            double annualDifference = physicianNetIncome - nonMDSalary;
+            cumulativeDifference += annualDifference;
+
+            physicianSalary *= (1 + Math.max(annualRaise, inflationRate));
+            nonMDSalary *= (1 + annualRaise);
+        }
+
+        int totalTimeToBecomeMD = (needsPostBacc ? yearsUntilPostBacc + postBaccYears + yearsUntilMedSchool : yearsUntilMedSchool) +
+                medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0);
+        return currentAge + totalTimeToBecomeMD + yearsAfterTraining;
+    }
+
+    /**
+     * Calculates target starting salary needed to break even in specified years
+     */
+    private double calculateTargetSalaryForBreakEven(double totalCost, int targetYears, int ageWhenStarting) {
+        double nonMDSalary = currentSalary * Math.pow(1 + annualRaise, 
+            (needsPostBacc ? yearsUntilPostBacc + postBaccYears + yearsUntilMedSchool : yearsUntilMedSchool) +
+            medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0));
+        
+        // Start with current physician salary and work backwards
+        double testSalary = physicianStartingSalary;
+        double step = 10000; // $10K increments
+        
+        while (step > 100) { // Continue until we're within $100
+            double cumulativeDifference = -totalCost;
+            double physicianSalary = testSalary;
+            
+            for (int year = 1; year <= targetYears; year++) {
+                double physicianNetIncome = physicianSalary;
+                if (year <= loanRepaymentYears) {
+                    physicianNetIncome -= (monthlyLoanPayment * 12);
+                }
+                
+                double annualDifference = physicianNetIncome - nonMDSalary;
+                cumulativeDifference += annualDifference;
+                
+                physicianSalary *= (1 + Math.max(annualRaise, inflationRate));
+                nonMDSalary *= (1 + annualRaise);
+            }
+            
+            if (cumulativeDifference >= 0) {
+                // We can break even with this salary, try lower
+                testSalary -= step;
+            } else {
+                // We can't break even with this salary, try higher
+                testSalary += step;
+            }
+            
+            step /= 2; // Reduce step size for more precision
+        }
+        
+        return Math.max(testSalary, 150000); // Ensure minimum realistic salary
     }
 
     public static class OpportunityCostResult {

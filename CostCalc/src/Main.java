@@ -88,8 +88,11 @@ public class Main {
         MDCalc.OpportunityCostResult result = calculator.calculateOpportunityCost();
         calculator.displayResults(result);
         
+        // Show optimization suggestions menu
+        calculator.displayOptimizationMenu(result, globalInput);
+        
         print("\nPress Enter to continue...");
-        globalInput.nextLine(); // consume remaining newline
+        //globalInput.nextLine(); // consume remaining newline
         globalInput.nextLine(); // wait for user input
     }
 
@@ -101,6 +104,9 @@ public class Main {
         
         MDCalc.OpportunityCostResult result = calculator.calculateOpportunityCost();
         calculator.displayResults(result);
+        
+        // Show optimization suggestions menu
+        calculator.displayOptimizationMenu(result, globalInput);
         
         print("\nPress Enter to continue...");
         globalInput.nextLine(); // consume remaining newline

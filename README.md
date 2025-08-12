@@ -36,6 +36,7 @@ This calculator provides a detailed financial analysis for aspiring physicians, 
 - **Auto-aligned repayment**: Option to extend loan term to retirement age for lower monthly burden
 - **Repayment burden analysis**: Warnings when loan payments exceed 50% of first-year physician income
 - **Complete interest tracking**: Captures both deferment and repayment phase interest
+- **Post-calculation optimization menu**: Interactive suggestions for reaching break-even earlier
 
 ### Professional Features
 - **Persistent defaults system**: Save and customize all default values for repeated use with validation
@@ -44,6 +45,7 @@ This calculator provides a detailed financial analysis for aspiring physicians, 
 - **Actionable warnings**: Specific guidance when break-even exceeds retirement age
 - **Economic sophistication**: Inflation-adjusted salary growth modeling with realistic assumptions
 - **Comprehensive menu system**: Easy navigation between calculation, defaults management, and exit
+- **Optimization suggestions**: Post-calculation menu with loan repayment and salary optimization strategies
 
 ### Detailed Cost Breakdown
 - Direct opportunity cost (lost wages)
@@ -76,6 +78,48 @@ The application features a main menu with three options:
 For calculations, the application offers two modes:
 - **Quick calculation** using current defaults
 - **Full input review** with ability to modify any parameter
+
+### **NEW**: Post-Calculation Optimization Menu
+
+After displaying the calculation results, the application now presents an **Optimization Suggestions** menu that helps users understand how to reach break-even earlier:
+
+#### 1. Loan Repayment Optimization Strategies
+- **Current situation analysis**: Shows break-even age, age when starting practice, and years to break-even
+- **Aggressive repayment scenarios**: Compares 5-year and 7-year repayment terms vs. current strategy
+- **Custom target analysis**: Allows users to specify a target break-even age
+- **Payment burden warnings**: Alerts when monthly payments exceed 50% of first-year physician income
+- **Years saved calculation**: Shows how many years earlier break-even can be achieved
+
+#### 2. Target Salary Recommendations
+- **Salary optimization scenarios**: Calculates target salaries needed for 5-year, 10-year, or retirement-age break-even
+- **Percentage increase analysis**: Shows how much salary increase is needed to reach targets
+- **Realistic salary validation**: Warns when calculated targets exceed realistic ranges
+- **Strategic recommendations**: Provides actionable advice for salary negotiation and career planning
+
+#### 3. Skip Optimization Suggestions
+- Option to proceed without optimization analysis
+
+**Example Optimization Output:**
+```
+=== LOAN REPAYMENT OPTIMIZATION ===
+Current situation:
+- Break-even age: 45 years old
+- Age when starting practice: 33 years old
+- Years to break-even after starting: 12 years
+- Current monthly payment: $3,456.78 (10-year term)
+
+=== AGGRESSIVE REPAYMENT SCENARIOS ===
+5-year aggressive repayment:
+- Monthly payment: $6,789.12
+- Annual burden: $81,469.44
+- New break-even age: 41 years old
+- Years saved: 4
+
+=== RECOMMENDATIONS ===
+✅ Consider accelerating loan repayment to reach break-even sooner.
+✅ Higher monthly payments reduce total interest and accelerate wealth building.
+⚠️  Ensure payment levels are sustainable with your lifestyle and other expenses.
+```
 
 The application will prompt for the following information:
 
@@ -243,6 +287,7 @@ non_trad_md_opportunity_cost_calc/
 - **v5.0**: Added configurable retirement age, auto-aligned loan repayment, robust input validation
 - **v6.0**: **Major release** - Persistent defaults system, inflation modeling, TL;DR results, professional formatting
 - **v6.1**: **Enhanced loan modeling** - Amortized repayment-phase interest, monthly payment simulation, repayment burden analysis
+- **v6.2**: **Optimization suggestions menu** - Post-calculation loan repayment and salary optimization strategies
 
 ## Contributing
 
