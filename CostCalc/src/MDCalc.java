@@ -614,8 +614,8 @@ public class MDCalc {
         System.out.printf("Total loan interest (deferment + repayment): $%,.2f%n", result.getLoanInterest());
 
         // Calculate and display loan repayment info
-        double totalLoanBalance = result.getTotalLoans() + result.getLoanInterest();
-        System.out.printf("Total loan balance at repayment start: $%,.2f%n", totalLoanBalance);
+        double startingRepaymentBalance = computeStartingLoanBalanceAtRepaymentStart();
+        System.out.printf("Total loan balance at repayment start: $%,.2f%n", startingRepaymentBalance);
         System.out.printf("Monthly loan payment (%d-year repayment): $%,.2f/mo%n", loanRepaymentYears, monthlyLoanPayment);
         double annualLoanPayment = monthlyLoanPayment * 12;
         System.out.printf("Annual loan payment burden: $%,.2f%n", annualLoanPayment);
@@ -691,7 +691,8 @@ public class MDCalc {
     private void displayLoanOptimizationSuggestions(OpportunityCostResult result, Scanner input) {
         System.out.println("\n=== LOAN REPAYMENT OPTIMIZATION ===");
         
-        double totalLoanBalance = result.getTotalLoans() + result.getLoanInterest();
+        // Use the correct starting balance at the beginning of repayment
+        double totalLoanBalance = computeStartingLoanBalanceAtRepaymentStart();
         int totalTimeToBecomeMD = (needsPostBacc ? yearsUntilPostBacc + postBaccYears + yearsUntilMedSchool : yearsUntilMedSchool) +
                 medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0);
         int ageWhenStarting = currentAge + totalTimeToBecomeMD;
@@ -805,6 +806,7 @@ public class MDCalc {
         int totalTimeToBecomeMD = (needsPostBacc ? yearsUntilPostBacc + postBaccYears + yearsUntilMedSchool : yearsUntilMedSchool) +
                 medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0);
         int ageWhenStarting = currentAge + totalTimeToBecomeMD;
+        double startingRepaymentBalance = computeStartingLoanBalanceAtRepaymentStart();
         
         System.out.println("Current situation:");
         System.out.printf("- Starting physician salary: $%,.2f%n", physicianStartingSalary);
@@ -820,7 +822,10 @@ public class MDCalc {
         System.out.println("\n=== SALARY OPTIMIZATION SCENARIOS ===");
         
         // Calculate what salary would be needed to break even in 5 years
-        double targetSalary5Years = calculateTargetSalaryForBreakEven(result.getTotalCost(), 5, ageWhenStarting);
+        // Use a 5-year payoff to reflect more realistic burden during those years
+        double fiveYearMonthly = calculateMonthlyPayment(startingRepaymentBalance, loanInterestRate, 5);
+        double targetSalary5Years = calculateTargetSalaryForBreakEvenWithCustomPayment(
+                result.getTotalCost(), 5, ageWhenStarting, fiveYearMonthly, 5);
         if (targetSalary5Years > physicianStartingSalary) {
             System.out.printf("To break even in 5 years after starting practice:%n");
             System.out.printf("- Target starting salary: $%,.2f%n", targetSalary5Years);
@@ -829,7 +834,9 @@ public class MDCalc {
         }
         
         // Calculate what salary would be needed to break even in 10 years
-        double targetSalary10Years = calculateTargetSalaryForBreakEven(result.getTotalCost(), 10, ageWhenStarting);
+        double tenYearMonthly = calculateMonthlyPayment(startingRepaymentBalance, loanInterestRate, 10);
+        double targetSalary10Years = calculateTargetSalaryForBreakEvenWithCustomPayment(
+                result.getTotalCost(), 10, ageWhenStarting, tenYearMonthly, 10);
         if (targetSalary10Years > physicianStartingSalary) {
             System.out.printf("\nTo break even in 10 years after starting practice:%n");
             System.out.printf("- Target starting salary: $%,.2f%n", targetSalary10Years);
@@ -840,7 +847,9 @@ public class MDCalc {
         // Calculate what salary would be needed to break even at retirement age
         int yearsToRetirement = retirementAge - ageWhenStarting;
         if (yearsToRetirement > 0) {
-            double targetSalaryRetirement = calculateTargetSalaryForBreakEven(result.getTotalCost(), yearsToRetirement, ageWhenStarting);
+            double retirementMonthly = calculateMonthlyPayment(startingRepaymentBalance, loanInterestRate, yearsToRetirement);
+            double targetSalaryRetirement = calculateTargetSalaryForBreakEvenWithCustomPayment(
+                    result.getTotalCost(), yearsToRetirement, ageWhenStarting, retirementMonthly, yearsToRetirement);
             if (targetSalaryRetirement > physicianStartingSalary) {
                 System.out.printf("\nTo break even by retirement age (%d):%n", retirementAge);
                 System.out.printf("- Target starting salary: $%,.2f%n", targetSalaryRetirement);
@@ -858,7 +867,9 @@ public class MDCalc {
             input.nextLine(); // consume newline
             
             if (targetYears > 0 && targetYears < (result.getBreakEvenAge() - ageWhenStarting)) {
-                double customTargetSalary = calculateTargetSalaryForBreakEven(result.getTotalCost(), targetYears, ageWhenStarting);
+                double customMonthly = calculateMonthlyPayment(startingRepaymentBalance, loanInterestRate, targetYears);
+                double customTargetSalary = calculateTargetSalaryForBreakEvenWithCustomPayment(
+                        result.getTotalCost(), targetYears, ageWhenStarting, customMonthly, targetYears);
                 System.out.printf("\nTo break even in %d years after starting practice:%n", targetYears);
                 System.out.printf("- Target starting salary: $%,.2f%n", customTargetSalary);
                 System.out.printf("- Salary increase needed: $%,.2f%n", customTargetSalary - physicianStartingSalary);
@@ -921,43 +932,95 @@ public class MDCalc {
      * Calculates target starting salary needed to break even in specified years
      */
     private double calculateTargetSalaryForBreakEven(double totalCost, int targetYears, int ageWhenStarting) {
-        double nonMDSalary = currentSalary * Math.pow(1 + annualRaise, 
+        double baseNonMDSalary = currentSalary * Math.pow(1 + annualRaise,
             (needsPostBacc ? yearsUntilPostBacc + postBaccYears + yearsUntilMedSchool : yearsUntilMedSchool) +
             medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0));
-        
-        // Start with current physician salary and work backwards
-        double testSalary = physicianStartingSalary;
-        double step = 10000; // $10K increments
-        
-        while (step > 100) { // Continue until we're within $100
-            double cumulativeDifference = -totalCost;
-            double physicianSalary = testSalary;
-            
-            for (int year = 1; year <= targetYears; year++) {
-                double physicianNetIncome = physicianSalary;
-                if (year <= loanRepaymentYears) {
-                    physicianNetIncome -= (monthlyLoanPayment * 12);
-                }
-                
-                double annualDifference = physicianNetIncome - nonMDSalary;
-                cumulativeDifference += annualDifference;
-                
-                physicianSalary *= (1 + Math.max(annualRaise, inflationRate));
-                nonMDSalary *= (1 + annualRaise);
-            }
-            
-            if (cumulativeDifference >= 0) {
-                // We can break even with this salary, try lower
-                testSalary -= step;
+
+        double low = 150000; // realistic minimum
+        double high = 2000000; // cap for search
+
+        for (int i = 0; i < 40; i++) { // binary search
+            double mid = (low + high) / 2.0;
+            boolean meets = salaryMeetsTarget(totalCost, targetYears, mid, baseNonMDSalary, monthlyLoanPayment, loanRepaymentYears);
+            if (meets) {
+                high = mid;
             } else {
-                // We can't break even with this salary, try higher
-                testSalary += step;
+                low = mid;
             }
-            
-            step /= 2; // Reduce step size for more precision
         }
-        
-        return Math.max(testSalary, 150000); // Ensure minimum realistic salary
+
+        return Math.max(high, 150000);
+    }
+
+    private double calculateTargetSalaryForBreakEvenWithCustomPayment(double totalCost, int targetYears,
+                                                                      int ageWhenStarting,
+                                                                      double customMonthlyPayment,
+                                                                      int customRepaymentYears) {
+        double baseNonMDSalary = currentSalary * Math.pow(1 + annualRaise,
+            (needsPostBacc ? yearsUntilPostBacc + postBaccYears + yearsUntilMedSchool : yearsUntilMedSchool) +
+            medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0));
+
+        double low = 150000;
+        double high = 2000000;
+
+        for (int i = 0; i < 40; i++) {
+            double mid = (low + high) / 2.0;
+            boolean meets = salaryMeetsTarget(totalCost, targetYears, mid, baseNonMDSalary, customMonthlyPayment, customRepaymentYears);
+            if (meets) {
+                high = mid;
+            } else {
+                low = mid;
+            }
+        }
+
+        return Math.max(high, 150000);
+    }
+
+    private boolean salaryMeetsTarget(double totalCost,
+                                      int targetYears,
+                                      double startingPhysicianSalary,
+                                      double baseNonMDSalary,
+                                      double monthlyPayment,
+                                      int repaymentYears) {
+        double cumulativeDifference = -totalCost;
+        double physicianSalary = startingPhysicianSalary;
+        double nonMDSalary = baseNonMDSalary;
+
+        for (int year = 1; year <= targetYears; year++) {
+            double physicianNetIncome = physicianSalary;
+            if (year <= repaymentYears) {
+                physicianNetIncome -= (monthlyPayment * 12);
+            }
+
+            double annualDifference = physicianNetIncome - nonMDSalary;
+            cumulativeDifference += annualDifference;
+
+            physicianSalary *= (1 + Math.max(annualRaise, inflationRate));
+            nonMDSalary *= (1 + annualRaise);
+        }
+
+        return cumulativeDifference >= 0;
+    }
+
+    private double computeStartingLoanBalanceAtRepaymentStart() {
+        double yearsForMedSchoolInterest = medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0);
+        double dailyLoanRate = loanInterestRate / 365.0;
+        int daysForMedSchoolInterest = (int) (yearsForMedSchoolInterest * 365);
+        double medSchoolAccrued = totalLoans;
+        if (daysForMedSchoolInterest > 0) {
+            medSchoolAccrued = totalLoans * Math.pow(1 + dailyLoanRate, daysForMedSchoolInterest);
+        }
+
+        double postBaccAccrued = needsPostBacc ? postBaccCost : 0;
+        if (needsPostBacc) {
+            double yearsForPostBaccInterest = postBaccYears + yearsUntilMedSchool + medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0);
+            int daysForPostBaccInterest = (int) (yearsForPostBaccInterest * 365);
+            if (daysForPostBaccInterest > 0) {
+                postBaccAccrued = postBaccCost * Math.pow(1 + dailyLoanRate, daysForPostBaccInterest);
+            }
+        }
+
+        return medSchoolAccrued + postBaccAccrued;
     }
 
     public static class OpportunityCostResult {
