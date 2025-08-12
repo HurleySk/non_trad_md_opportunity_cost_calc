@@ -693,6 +693,8 @@ public class MDCalc {
         
         // Use the correct starting balance at the beginning of repayment
         double totalLoanBalance = computeStartingLoanBalanceAtRepaymentStart();
+        double principalSum = this.totalLoans + (needsPostBacc ? postBaccCost : 0);
+        double defermentInterest = Math.max(0, totalLoanBalance - principalSum);
         int totalTimeToBecomeMD = (needsPostBacc ? yearsUntilPostBacc + postBaccYears + yearsUntilMedSchool : yearsUntilMedSchool) +
                 medSchoolYears + residencyYears + (needsFellowship ? fellowshipYears : 0);
         int ageWhenStarting = currentAge + totalTimeToBecomeMD;
@@ -717,7 +719,9 @@ public class MDCalc {
         // Scenario 1: 5-year aggressive repayment
         int aggressiveYears = 5;
         double aggressiveMonthlyPayment = calculateMonthlyPayment(totalLoanBalance, loanInterestRate, aggressiveYears);
-        int aggressiveBreakEvenAge = calculateBreakEvenAgeWithCustomPayment(result.getTotalCost(), aggressiveMonthlyPayment, aggressiveYears);
+        RepaymentSummary aggressiveRepay = simulateRepayment(totalLoanBalance, aggressiveMonthlyPayment, loanInterestRate, aggressiveYears);
+        double aggressiveTotalCost = result.getDirectOpportunityCost() + result.getLostRetirementGrowth() + (defermentInterest + aggressiveRepay.totalInterest) + principalSum;
+        int aggressiveBreakEvenAge = calculateBreakEvenAgeWithCustomPayment(aggressiveTotalCost, aggressiveMonthlyPayment, aggressiveYears);
         
         if (aggressiveBreakEvenAge < result.getBreakEvenAge()) {
             System.out.printf("5-year aggressive repayment:%n");
@@ -738,7 +742,9 @@ public class MDCalc {
         // Scenario 2: 7-year moderate repayment
         int moderateYears = 7;
         double moderateMonthlyPayment = calculateMonthlyPayment(totalLoanBalance, loanInterestRate, moderateYears);
-        int moderateBreakEvenAge = calculateBreakEvenAgeWithCustomPayment(result.getTotalCost(), moderateMonthlyPayment, moderateYears);
+        RepaymentSummary moderateRepay = simulateRepayment(totalLoanBalance, moderateMonthlyPayment, loanInterestRate, moderateYears);
+        double moderateTotalCost = result.getDirectOpportunityCost() + result.getLostRetirementGrowth() + (defermentInterest + moderateRepay.totalInterest) + principalSum;
+        int moderateBreakEvenAge = calculateBreakEvenAgeWithCustomPayment(moderateTotalCost, moderateMonthlyPayment, moderateYears);
         
         if (moderateBreakEvenAge < result.getBreakEvenAge()) {
             System.out.printf("\n7-year moderate repayment:%n");
@@ -765,10 +771,14 @@ public class MDCalc {
                 int yearsToTarget = targetBreakEvenAge - ageWhenStarting;
                 if (yearsToTarget > 0) {
                     double customMonthlyPayment = calculateMonthlyPayment(totalLoanBalance, loanInterestRate, yearsToTarget);
+                    RepaymentSummary customRepay = simulateRepayment(totalLoanBalance, customMonthlyPayment, loanInterestRate, yearsToTarget);
+                    double customTotalCost = result.getDirectOpportunityCost() + result.getLostRetirementGrowth() + (defermentInterest + customRepay.totalInterest) + principalSum;
                     System.out.printf("\nTo reach break-even at age %d:%n", targetBreakEvenAge);
                     System.out.printf("- Required repayment term: %d years%n", yearsToTarget);
                     System.out.printf("- Monthly payment: $%,.2f%n", customMonthlyPayment);
                     System.out.printf("- Annual burden: $%,.2f%n", customMonthlyPayment * 12);
+                    int customBreakEvenAge = calculateBreakEvenAgeWithCustomPayment(customTotalCost, customMonthlyPayment, yearsToTarget);
+                    System.out.printf("- Projected break-even age with this plan: %d years old%n", customBreakEvenAge);
                     
                     double percentOfIncome = (customMonthlyPayment * 12 / physicianStartingSalary) * 100;
                     if (percentOfIncome > 50) {
